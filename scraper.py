@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-BandiMonitor — Scraper RSS + Score AI
-Usa aggregatori WordPress (feed stabili) + Gazzetta Ufficiale
+BandiMonitor — Scraper RSS + Score AI (Gemini API - gratuita)
 """
 
 import json
@@ -13,11 +12,10 @@ from datetime import datetime, date
 from urllib.request import urlopen, Request
 import http.client
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = "gemini-2.0-flash"
 BANDI_JSON = "bandi.json"
 
-# Feed RSS verificati e stabili — tutti WordPress o istituzionali con feed standard
 FEED_RSS = [
     {
         "nome": "Europa Innovazione — Bandi Nazionali",
@@ -35,23 +33,23 @@ FEED_RSS = [
         "region": "Nazionale"
     },
     {
-        "nome": "Gazzetta Ufficiale — Serie Generale",
-        "url": "https://www.gazzettaufficiale.it/rss/homepage.jsp",
+        "nome": "Obiettivo Europa — Formazione e Lavoro",
+        "url": "https://www.obiettivoeuropa.com/feed/",
         "region": "Nazionale"
     },
     {
-        "nome": "Fondimpresa",
-        "url": "https://www.fondimpresa.it/feed/",
+        "nome": "Talentform — Formazione Finanziata",
+        "url": "https://www.talentform.it/feed/",
         "region": "Nazionale"
     },
     {
-        "nome": "Incentivimpresa — Formazione",
-        "url": "https://www.incentivimpresa.it/feed/",
+        "nome": "Lavoro.gov.it — Notizie",
+        "url": "https://www.lavoro.gov.it/feed",
         "region": "Nazionale"
     },
     {
-        "nome": "Bandi e Finanziamenti IT",
-        "url": "https://www.agevolazioni.net/feed/",
+        "nome": "ItaliaOggi — Formazione",
+        "url": "https://www.italiaoggi.it/rss/formazione",
         "region": "Nazionale"
     },
 ]
@@ -62,13 +60,13 @@ KEYWORDS_POSITIVI = [
     "fondi interprofessionali", "voucher formativo", "upskilling",
     "reskilling", "aggiornamento professionale", "blended", "online",
     "apprendimento", "qualificazione", "riqualificazione", "avviso",
-    "finanziamento formazione", "percorso formativo"
+    "finanziamento formazione", "percorso formativo", "bando formazione"
 ]
 
 KEYWORDS_NEGATIVI = [
-    "appalto", "gara d'appalto", "lavori pubblici", "infrastrutture stradali",
-    "edilizia", "costruzione", "demolizione", "smaltimento rifiuti",
-    "concorso pubblico dipendenti", "selezione pubblica personale"
+    "appalto", "gara d'appalto", "lavori pubblici",
+    "edilizia", "costruzione", "demolizione",
+    "concorso pubblico dipendenti", "selezione personale"
 ]
 
 def genera_id(titolo, url):
@@ -103,19 +101,15 @@ def fetch_url(url, timeout=20):
         return ""
 
 def parse_feed(xml_text):
-    """Parsing robusto che supporta RSS 2.0 e Atom."""
     items = []
     if not xml_text or len(xml_text) < 50:
         return items
     try:
-        # Pulizia namespace per semplificare
         xml_clean = re.sub(r' xmlns[^=]*="[^"]*"', '', xml_text)
-        # Rimuovi prefissi namespace ma mantieni il tag
         xml_clean = re.sub(r'<([a-zA-Z]+):([a-zA-Z]+)', r'<\2', xml_clean)
         xml_clean = re.sub(r'</([a-zA-Z]+):([a-zA-Z]+)', r'</\2', xml_clean)
         root = ET.fromstring(xml_clean)
 
-        # RSS 2.0
         for item in root.iter("item"):
             titolo = pulisci_testo(item.findtext("title") or "")
             link = (item.findtext("link") or "").strip()
@@ -127,7 +121,6 @@ def parse_feed(xml_text):
             if titolo:
                 items.append({"titolo": titolo, "url": link, "descrizione": desc})
 
-        # Atom (entry invece di item)
         if not items:
             for entry in root.iter("entry"):
                 titolo = pulisci_testo(entry.findtext("title") or "")
@@ -142,16 +135,16 @@ def parse_feed(xml_text):
 
     except ET.ParseError as e:
         print(f"  ⚠ XML parse error: {e}")
-        # Fallback: estrazione regex per feed malformati
-        titoli = re.findall(r'<title[^>]*><!\[CDATA\[(.*?)\]\]></title>|<title[^>]*>(.*?)</title>', xml_text, re.DOTALL)
+        # Fallback regex per feed malformati
+        titoli = re.findall(r'<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>', xml_text, re.DOTALL)
         links = re.findall(r'<link[^>]*>(https?://[^<]+)</link>', xml_text)
-        descs = re.findall(r'<description[^>]*><!\[CDATA\[(.*?)\]\]></description>|<description[^>]*>(.*?)</description>', xml_text, re.DOTALL)
-        for i, (t1, t2) in enumerate(titoli[1:], 0):  # Salta il primo (titolo del feed)
-            titolo = pulisci_testo(t1 or t2)
+        descs = re.findall(r'<description[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</description>', xml_text, re.DOTALL)
+        for i, titolo in enumerate(titoli[1:], 0):
+            titolo = pulisci_testo(titolo)
             if titolo and len(titolo) > 5:
                 link = links[i] if i < len(links) else ""
-                d1, d2 = descs[i] if i < len(descs) else ("", "")
-                items.append({"titolo": titolo, "url": link, "descrizione": pulisci_testo(d1 or d2)})
+                desc = pulisci_testo(descs[i]) if i < len(descs) else ""
+                items.append({"titolo": titolo, "url": link, "descrizione": desc})
 
     return items
 
@@ -161,26 +154,26 @@ def is_rilevante_locale(titolo, descrizione):
     ha_neg = sum(1 for kw in KEYWORDS_NEGATIVI if kw in testo) >= 2
     return ha_pos and not ha_neg
 
-def chiama_claude(prompt, max_tokens=300):
-    if not ANTHROPIC_API_KEY:
-        raise ValueError("ANTHROPIC_API_KEY non impostata")
+def chiama_gemini(prompt, max_tokens=300):
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY non impostata")
+    
+    url = f"/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
     body = json.dumps({
-        "model": ANTHROPIC_MODEL,
-        "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt}]
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.1}
     }).encode("utf-8")
-    conn = http.client.HTTPSConnection("api.anthropic.com")
-    conn.request("POST", "/v1/messages", body=body, headers={
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
-    })
+    
+    conn = http.client.HTTPSConnection("generativelanguage.googleapis.com")
+    conn.request("POST", url, body=body, headers={"Content-Type": "application/json"})
     resp = conn.getresponse()
     data = json.loads(resp.read().decode("utf-8"))
     conn.close()
+    
     if "error" in data:
-        raise ValueError(f"API error: {data['error']}")
-    return data["content"][0]["text"]
+        raise ValueError(f"Gemini API error: {data['error']}")
+    
+    return data["candidates"][0]["content"]["parts"][0]["text"]
 
 def verifica_rilevanza_ai(titolo, descrizione):
     prompt = f"""Rispondi SOLO con SI o NO.
@@ -189,21 +182,28 @@ TITOLO: {titolo}
 DESCRIZIONE: {descrizione[:400]}
 Rilevante?"""
     try:
-        r = chiama_claude(prompt, max_tokens=5).strip().upper()
-        return r.startswith("SI") or r == "SÌ"
+        r = chiama_gemini(prompt, max_tokens=5).strip().upper()
+        return r.startswith("SI") or r == "SÌ" or r.startswith("YES")
     except Exception as e:
         print(f"  ⚠ AI relevance error: {e}")
         return False
 
 def calcola_score_ai(titolo, descrizione):
-    prompt = f"""Analizza questo bando italiano. Rispondi SOLO con JSON valido, nessun testo extra.
+    prompt = f"""Analizza questo bando italiano. Rispondi SOLO con JSON valido, nessun testo extra, nessun markdown.
 BANDO: {titolo}
 DESCRIZIONE: {descrizione[:600]}
-{{"fad":<0-100>,"accessibilita":<0-100>,"trend":<0-100>,"budget":<0-100>}}
-fad=ammette e-learning senza docente, accessibilita=accessibile a privati senza accreditamento, trend=argomento di tendenza AI/digitale/green, budget=valore economico relativo"""
+Formato richiesto: {{"fad":<0-100>,"accessibilita":<0-100>,"trend":<0-100>,"budget":<0-100>}}
+fad=ammette e-learning senza docente (0=solo presenza, 100=solo FAD)
+accessibilita=accessibile a privati senza accreditamento (0=richiede accreditamento, 100=aperto a tutti)
+trend=argomento di tendenza AI/digitale/green (0=obsoleto, 100=molto trendy)
+budget=valore economico relativo (0=piccolo, 100=molto grande)"""
     try:
-        r = chiama_claude(prompt, max_tokens=80).strip()
-        r = re.sub(r'```[a-z]*', '', r).strip()
+        r = chiama_gemini(prompt, max_tokens=80).strip()
+        r = re.sub(r'```[a-z]*', '', r).strip().strip('`')
+        # Estrai solo il JSON se c'è testo intorno
+        match = re.search(r'\{[^}]+\}', r)
+        if match:
+            r = match.group(0)
         scores = json.loads(r)
         for k in ["fad", "accessibilita", "trend", "budget"]:
             scores[k] = max(0, min(100, int(scores.get(k, 50))))
@@ -221,11 +221,11 @@ def estrai_tags(titolo, descrizione, scores):
     if scores["fad"] >= 60: tags.append("FAD")
     if "pnrr" in testo: tags.append("PNRR")
     if "fse" in testo: tags.append("FSE+")
-    if "digitale" in testo or "digital" in testo or "ai" in testo: tags.append("Digitale")
+    if "digitale" in testo or "digital" in testo or " ai " in testo: tags.append("Digitale")
     if "green" in testo or "sostenib" in testo: tags.append("Green")
     if "voucher" in testo: tags.append("Voucher")
     if "pmi" in testo or "piccole imprese" in testo: tags.append("PMI")
-    if "interprofessional" in testo: tags.append("Fondi Interprofessionali")
+    if "interprofessional" in testo: tags.append("Fondi Interprof.")
     return tags
 
 def carica_bandi():
@@ -245,7 +245,7 @@ def salva_bandi(bandi):
 
 def main():
     print(f"🕐 BandiMonitor — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print(f"📡 Feed: {len(FEED_RSS)} | Modello: {ANTHROPIC_MODEL}\n")
+    print(f"📡 Feed: {len(FEED_RSS)} | Modello: Gemini {GEMINI_MODEL} (gratuito)\n")
 
     bandi_esistenti = carica_bandi()
     ids_esistenti = {b["id"] for b in bandi_esistenti}
@@ -267,7 +267,7 @@ def main():
             feed_ok += 1
             print(f"   ✅ {len(items)} item trovati")
         else:
-            print(f"   ⚠ Nessun item parsato (feed potrebbe essere vuoto o malformato)")
+            print(f"   ⚠ Nessun item parsato")
         tot_items += len(items)
 
         for item in items:
@@ -314,7 +314,6 @@ def main():
             ids_esistenti.add(bid)
             print(f"      ✅ Score: {score_tot}/100 | Tags: {', '.join(tags)}")
 
-    # Rimuovi scaduti
     oggi = date.today().isoformat()
     attivi = [b for b in bandi_esistenti if not b.get("scadenza") or b["scadenza"] >= oggi]
     rimossi = len(bandi_esistenti) - len(attivi)
