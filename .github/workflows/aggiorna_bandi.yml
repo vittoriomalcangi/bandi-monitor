@@ -23,9 +23,19 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Debug secrets (solo per test)
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "❌ GEMINI_API_KEY è vuota o non trovata"
+          else
+            echo "✅ GEMINI_API_KEY trovata (lunghezza: ${#GEMINI_API_KEY})"
+          fi
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - name: Esegui scraper
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scraper.py
 
       - name: Commit e push bandi.json aggiornato
