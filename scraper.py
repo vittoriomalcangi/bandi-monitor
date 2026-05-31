@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 BandiMonitor — Scraper RSS + Score AI
-Legge i feed RSS regionali, filtra i bandi formazione,
-calcola lo score con Claude API e aggiorna bandi.json
+Usa aggregatori WordPress (feed stabili) + Gazzetta Ufficiale
 """
 
 import json
@@ -18,14 +17,43 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 BANDI_JSON = "bandi.json"
 
+# Feed RSS verificati e stabili — tutti WordPress o istituzionali con feed standard
 FEED_RSS = [
-    {"nome": "Lombardia", "url": "https://www.regione.lombardia.it/wps/wcm/connect/DisegnoPRL/FeedRSS/stFeedRssBandi", "region": "Lombardia"},
-    {"nome": "Emilia-Romagna", "url": "https://imprese.regione.emilia-romagna.it/Finanziamenti/RSS", "region": "Emilia-Romagna"},
-    {"nome": "Campania", "url": "https://www.regione.campania.it/regione/it/feed-rss", "region": "Campania"},
-    {"nome": "Lazio", "url": "https://www.regione.lazio.it/rss", "region": "Lazio"},
-    {"nome": "Piemonte", "url": "https://bandi.regione.piemonte.it/contributi-finanziamenti?rss=1", "region": "Piemonte"},
-    {"nome": "Puglia", "url": "http://formazione.regione.puglia.it/index.php?page=news&opz=readsch&id=1", "region": "Puglia"},
-    {"nome": "Italia Domani (PNRR)", "url": "https://www.italiadomani.gov.it/content/sogei-ng/it/it/feed-rss/_jcr_content/par/accordion_container/accordion-item-0/column_container/par/accordion_item/column_container_copy/par/link_list_container/link_list/item0.stream/1638886579694/e1517d8d5b1d8d2dc1f7b01fd6b17ac5bddf18d0/bandi.xml", "region": "Nazionale PNRR"},
+    {
+        "nome": "Europa Innovazione — Bandi Nazionali",
+        "url": "https://www.europainnovazione.com/category/bandi-nazionali/feed/",
+        "region": "Nazionale"
+    },
+    {
+        "nome": "Europa Innovazione — Bandi Europei",
+        "url": "https://www.europainnovazione.com/category/bandi-europei/feed/",
+        "region": "Europeo"
+    },
+    {
+        "nome": "Europa Innovazione — Formazione",
+        "url": "https://www.europainnovazione.com/tag/formazione/feed/",
+        "region": "Nazionale"
+    },
+    {
+        "nome": "Gazzetta Ufficiale — Serie Generale",
+        "url": "https://www.gazzettaufficiale.it/rss/homepage.jsp",
+        "region": "Nazionale"
+    },
+    {
+        "nome": "Fondimpresa",
+        "url": "https://www.fondimpresa.it/feed/",
+        "region": "Nazionale"
+    },
+    {
+        "nome": "Incentivimpresa — Formazione",
+        "url": "https://www.incentivimpresa.it/feed/",
+        "region": "Nazionale"
+    },
+    {
+        "nome": "Bandi e Finanziamenti IT",
+        "url": "https://www.agevolazioni.net/feed/",
+        "region": "Nazionale"
+    },
 ]
 
 KEYWORDS_POSITIVI = [
@@ -33,13 +61,14 @@ KEYWORDS_POSITIVI = [
     "competenze", "digitale", "digitali", "fse", "fse+", "pnrr",
     "fondi interprofessionali", "voucher formativo", "upskilling",
     "reskilling", "aggiornamento professionale", "blended", "online",
-    "apprendimento", "qualificazione", "riqualificazione"
+    "apprendimento", "qualificazione", "riqualificazione", "avviso",
+    "finanziamento formazione", "percorso formativo"
 ]
 
 KEYWORDS_NEGATIVI = [
-    "appalto", "gara d'appalto", "lavori pubblici", "infrastrutture",
-    "edilizia", "strade", "ponti", "rifiuti", "acqua potabile",
-    "concorso pubblico", "selezione pubblica"
+    "appalto", "gara d'appalto", "lavori pubblici", "infrastrutture stradali",
+    "edilizia", "costruzione", "demolizione", "smaltimento rifiuti",
+    "concorso pubblico dipendenti", "selezione pubblica personale"
 ]
 
 def genera_id(titolo, url):
@@ -50,45 +79,80 @@ def pulisci_testo(testo):
     if not testo:
         return ""
     testo = re.sub(r'<[^>]+>', ' ', testo)
+    testo = re.sub(r'&[a-z]+;', ' ', testo)
     testo = re.sub(r'\s+', ' ', testo)
     return testo.strip()[:2000]
 
-def fetch_rss(url, timeout=20):
+def fetch_url(url, timeout=20):
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; BandiMonitor/1.0)",
-        "Accept": "application/rss+xml, application/xml, text/xml, */*"
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 BandiMonitor/1.0",
+        "Accept": "application/rss+xml, application/xml, application/atom+xml, text/xml, */*"
     }
     try:
         req = Request(url, headers=headers)
         with urlopen(req, timeout=timeout) as resp:
             content = resp.read()
-            # Prova UTF-8, poi latin-1
-            try:
-                return content.decode("utf-8")
-            except UnicodeDecodeError:
-                return content.decode("latin-1", errors="replace")
+            for enc in ["utf-8", "latin-1", "iso-8859-1"]:
+                try:
+                    return content.decode(enc)
+                except UnicodeDecodeError:
+                    continue
+            return content.decode("utf-8", errors="replace")
     except Exception as e:
-        print(f"  ⚠ Errore fetch {url}: {e}")
+        print(f"  ⚠ Fetch error: {e}")
         return ""
 
-def parse_rss(xml_text):
+def parse_feed(xml_text):
+    """Parsing robusto che supporta RSS 2.0 e Atom."""
     items = []
-    if not xml_text:
+    if not xml_text or len(xml_text) < 50:
         return items
     try:
-        # Rimuovi namespace per semplificare il parsing
-        xml_clean = re.sub(r'\s+xmlns[^=]*="[^"]*"', '', xml_text)
-        xml_clean = re.sub(r'<(\w+):[^>]*>', r'<\1>', xml_clean)
-        xml_clean = re.sub(r'</(\w+):[^>]*>', r'</\1>', xml_clean)
+        # Pulizia namespace per semplificare
+        xml_clean = re.sub(r' xmlns[^=]*="[^"]*"', '', xml_text)
+        # Rimuovi prefissi namespace ma mantieni il tag
+        xml_clean = re.sub(r'<([a-zA-Z]+):([a-zA-Z]+)', r'<\2', xml_clean)
+        xml_clean = re.sub(r'</([a-zA-Z]+):([a-zA-Z]+)', r'</\2', xml_clean)
         root = ET.fromstring(xml_clean)
+
+        # RSS 2.0
         for item in root.iter("item"):
             titolo = pulisci_testo(item.findtext("title") or "")
             link = (item.findtext("link") or "").strip()
-            desc = pulisci_testo(item.findtext("description") or item.findtext("summary") or "")
+            desc = pulisci_testo(
+                item.findtext("description") or
+                item.findtext("summary") or
+                item.findtext("content") or ""
+            )
             if titolo:
                 items.append({"titolo": titolo, "url": link, "descrizione": desc})
+
+        # Atom (entry invece di item)
+        if not items:
+            for entry in root.iter("entry"):
+                titolo = pulisci_testo(entry.findtext("title") or "")
+                link_el = entry.find("link")
+                link = (link_el.get("href") if link_el is not None else "") or ""
+                desc = pulisci_testo(
+                    entry.findtext("summary") or
+                    entry.findtext("content") or ""
+                )
+                if titolo:
+                    items.append({"titolo": titolo, "url": link, "descrizione": desc})
+
     except ET.ParseError as e:
-        print(f"  ⚠ Errore XML: {e}")
+        print(f"  ⚠ XML parse error: {e}")
+        # Fallback: estrazione regex per feed malformati
+        titoli = re.findall(r'<title[^>]*><!\[CDATA\[(.*?)\]\]></title>|<title[^>]*>(.*?)</title>', xml_text, re.DOTALL)
+        links = re.findall(r'<link[^>]*>(https?://[^<]+)</link>', xml_text)
+        descs = re.findall(r'<description[^>]*><!\[CDATA\[(.*?)\]\]></description>|<description[^>]*>(.*?)</description>', xml_text, re.DOTALL)
+        for i, (t1, t2) in enumerate(titoli[1:], 0):  # Salta il primo (titolo del feed)
+            titolo = pulisci_testo(t1 or t2)
+            if titolo and len(titolo) > 5:
+                link = links[i] if i < len(links) else ""
+                d1, d2 = descs[i] if i < len(descs) else ("", "")
+                items.append({"titolo": titolo, "url": link, "descrizione": pulisci_testo(d1 or d2)})
+
     return items
 
 def is_rilevante_locale(titolo, descrizione):
@@ -115,12 +179,12 @@ def chiama_claude(prompt, max_tokens=300):
     data = json.loads(resp.read().decode("utf-8"))
     conn.close()
     if "error" in data:
-        raise ValueError(f"Errore API: {data['error']}")
+        raise ValueError(f"API error: {data['error']}")
     return data["content"][0]["text"]
 
 def verifica_rilevanza_ai(titolo, descrizione):
     prompt = f"""Rispondi SOLO con SI o NO.
-Un bando è rilevante se riguarda formazione professionale erogabile online, e-learning, FAD, blended o video fruibile autonomamente senza docente in presenza.
+Un bando è rilevante se riguarda formazione professionale erogabile in modalità e-learning, FAD, online, blended, video o materiale digitale fruibile autonomamente senza docente in presenza obbligatoria.
 TITOLO: {titolo}
 DESCRIZIONE: {descrizione[:400]}
 Rilevante?"""
@@ -128,24 +192,24 @@ Rilevante?"""
         r = chiama_claude(prompt, max_tokens=5).strip().upper()
         return r.startswith("SI") or r == "SÌ"
     except Exception as e:
-        print(f"  ⚠ Errore AI rilevanza: {e}")
+        print(f"  ⚠ AI relevance error: {e}")
         return False
 
 def calcola_score_ai(titolo, descrizione):
-    prompt = f"""Analizza questo bando italiano. Rispondi SOLO con JSON valido, nessun testo.
+    prompt = f"""Analizza questo bando italiano. Rispondi SOLO con JSON valido, nessun testo extra.
 BANDO: {titolo}
 DESCRIZIONE: {descrizione[:600]}
 {{"fad":<0-100>,"accessibilita":<0-100>,"trend":<0-100>,"budget":<0-100>}}
-fad=ammette e-learning senza docente, accessibilita=accessibile a privati senza accreditamento, trend=argomento di tendenza, budget=valore economico relativo"""
+fad=ammette e-learning senza docente, accessibilita=accessibile a privati senza accreditamento, trend=argomento di tendenza AI/digitale/green, budget=valore economico relativo"""
     try:
         r = chiama_claude(prompt, max_tokens=80).strip()
-        r = r.replace("```json", "").replace("```", "").strip()
+        r = re.sub(r'```[a-z]*', '', r).strip()
         scores = json.loads(r)
         for k in ["fad", "accessibilita", "trend", "budget"]:
             scores[k] = max(0, min(100, int(scores.get(k, 50))))
         return scores
     except Exception as e:
-        print(f"  ⚠ Errore AI score: {e}")
+        print(f"  ⚠ AI score error: {e}")
         return {"fad": 50, "accessibilita": 50, "trend": 50, "budget": 50}
 
 def calcola_totale(s):
@@ -157,10 +221,11 @@ def estrai_tags(titolo, descrizione, scores):
     if scores["fad"] >= 60: tags.append("FAD")
     if "pnrr" in testo: tags.append("PNRR")
     if "fse" in testo: tags.append("FSE+")
-    if "digitale" in testo or "digital" in testo: tags.append("Digitale")
+    if "digitale" in testo or "digital" in testo or "ai" in testo: tags.append("Digitale")
     if "green" in testo or "sostenib" in testo: tags.append("Green")
     if "voucher" in testo: tags.append("Voucher")
-    if "pmi" in testo: tags.append("PMI")
+    if "pmi" in testo or "piccole imprese" in testo: tags.append("PMI")
+    if "interprofessional" in testo: tags.append("Fondi Interprofessionali")
     return tags
 
 def carica_bandi():
@@ -170,33 +235,39 @@ def carica_bandi():
     return []
 
 def salva_bandi(bandi):
-    # Deduplicazione per id prima di salvare
     seen = {}
     for b in bandi:
         seen[b["id"]] = b
-    bandi_unici = sorted(seen.values(), key=lambda b: b.get("score_totale", 0), reverse=True)
+    ordinati = sorted(seen.values(), key=lambda b: b.get("score_totale", 0), reverse=True)
     with open(BANDI_JSON, "w", encoding="utf-8") as f:
-        json.dump(bandi_unici, f, ensure_ascii=False, indent=2)
-    print(f"\n✅ Salvati {len(bandi_unici)} bandi (deduplicati) in {BANDI_JSON}")
+        json.dump(ordinati, f, ensure_ascii=False, indent=2)
+    print(f"\n✅ Salvati {len(ordinati)} bandi in {BANDI_JSON}")
 
 def main():
     print(f"🕐 BandiMonitor — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"📡 Feed: {len(FEED_RSS)} | Modello: {ANTHROPIC_MODEL}\n")
 
     bandi_esistenti = carica_bandi()
-    # Deduplicazione anche in fase di caricamento
     ids_esistenti = {b["id"] for b in bandi_esistenti}
     print(f"📚 Bandi nel database: {len(ids_esistenti)}")
 
     nuovi = []
     tot_items = 0
     tot_nuovi = 0
+    feed_ok = 0
 
     for feed in FEED_RSS:
         print(f"\n📡 {feed['nome']}…")
-        xml = fetch_rss(feed["url"])
-        items = parse_rss(xml)
-        print(f"   {len(items)} item nel feed")
+        xml = fetch_url(feed["url"])
+        if not xml:
+            print(f"   ❌ Feed non raggiungibile")
+            continue
+        items = parse_feed(xml)
+        if items:
+            feed_ok += 1
+            print(f"   ✅ {len(items)} item trovati")
+        else:
+            print(f"   ⚠ Nessun item parsato (feed potrebbe essere vuoto o malformato)")
         tot_items += len(items)
 
         for item in items:
@@ -207,19 +278,23 @@ def main():
                 continue
             if not is_rilevante_locale(item["titolo"], item["descrizione"]):
                 continue
+
             print(f"   🔍 {item['titolo'][:65]}…")
+
             if not verifica_rilevanza_ai(item["titolo"], item["descrizione"]):
                 print(f"      ↳ Scartato dall'AI")
                 continue
+
             tot_nuovi += 1
             scores = calcola_score_ai(item["titolo"], item["descrizione"])
             score_tot = calcola_totale(scores)
             tags = estrai_tags(item["titolo"], item["descrizione"], scores)
+
             bando = {
                 "id": bid,
                 "titolo": item["titolo"],
                 "ente": feed["nome"],
-                "fonte": f"RSS {feed['nome']}",
+                "fonte": feed["nome"],
                 "url": item["url"],
                 "scadenza": "",
                 "budget": "",
@@ -249,6 +324,7 @@ def main():
     salva_bandi(attivi + nuovi)
 
     print(f"\n📊 Riepilogo:")
+    print(f"   Feed funzionanti: {feed_ok}/{len(FEED_RSS)}")
     print(f"   Item RSS totali: {tot_items}")
     print(f"   Nuovi bandi aggiunti: {tot_nuovi}")
     print(f"   Database finale: {len(attivi) + len(nuovi)} bandi")
