@@ -1,25 +1,5 @@
 [
   {
-    "id": "esempio001",
-    "titolo": "Avviso FSE+ 2024 – Competenze digitali per lavoratori occupati",
-    "ente": "Regione Lombardia",
-    "fonte": "RSS Lombardia",
-    "url": "https://www.bandi.regione.lombardia.it",
-    "scadenza": "2026-09-30",
-    "budget": "€ 8.500.000",
-    "descrizione": "Finanziamento per percorsi formativi sulle competenze digitali. Ammessi moduli e-learning fruibili autonomamente. Non richiesto accreditamento per privati in partenariato.",
-    "tags": ["FAD", "Digitale", "FSE+"],
-    "score_fad": 95,
-    "score_accessibilita": 70,
-    "score_trend": 90,
-    "score_budget": 85,
-    "score_totale": 88,
-    "data_inserimento": "2026-05-31",
-    "analisi_ai": null,
-    "stato": "Attivo",
-    "region": "Lombardia"
-  },
-  {
     "id": "esempio002",
     "titolo": "Catalogo Fondimpresa 2025 – Formazione continua PMI",
     "ente": "Fondimpresa",
@@ -28,7 +8,11 @@
     "scadenza": "2026-12-31",
     "budget": "Voucher aziendali",
     "descrizione": "Corsi e-learning stand-alone esplicitamente ammessi nel catalogo Fondimpresa. Il soggetto erogatore si iscrive al catalogo presentando schede corso.",
-    "tags": ["FAD", "Catalogo", "PMI"],
+    "tags": [
+      "FAD",
+      "Catalogo",
+      "PMI"
+    ],
     "score_fad": 100,
     "score_accessibilita": 90,
     "score_trend": 75,
@@ -38,5 +22,29 @@
     "analisi_ai": null,
     "stato": "Attivo",
     "region": "Nazionale"
+  },
+  {
+    "id": "esempio001",
+    "titolo": "Avviso FSE+ 2024 – Competenze digitali per lavoratori occupati",
+    "ente": "Regione Lombardia",
+    "fonte": "RSS Lombardia",
+    "url": "https://www.bandi.regione.lombardia.it",
+    "scadenza": "2026-09-30",
+    "budget": "€ 8.500.000",
+    "descrizione": "Finanziamento per percorsi formativi sulle competenze digitali. Ammessi moduli e-learning fruibili autonomamente. Non richiesto accreditamento per privati in partenariato.",
+    "tags": [
+      "FAD",
+      "Digitale",
+      "FSE+"
+    ],
+    "score_fad": 95,
+    "score_accessibilita": 70,
+    "score_trend": 90,
+    "score_budget": 85,
+    "score_totale": 88,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Lombardia"
   }
 ]
