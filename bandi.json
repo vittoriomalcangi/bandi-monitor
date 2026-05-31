@@ -209,6 +209,29 @@
     "region": "Nazionale"
   },
   {
+    "id": "ca9ec88328a6",
+    "titolo": "Come iscriversi a FonARCom: guida completa per aziende e consulenti del lavoro",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/consigli/come-iscriversi-a-fonarcom-guida-completa-per-aziende-e-consulenti-del-lavoro.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "FonARCom è uno dei Fondi Paritetici Interprofessionali più utilizzati dalle aziende italiane per finanziare la formazione continua dei lavoratori. L’iscrizione a FonARCom consente alle imprese di accedere a risorse economiche dedicate allo sviluppo delle competenze, senza costi aggiuntivi. In questa guida vedremo in modo chiaro e operativo come iscriversi a FonARCom, quali sono i requisiti ... L'articolo Come iscriversi a FonARCom: guida completa per aziende e consulenti del lavoro proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD",
+      "Fondi Interprof."
+    ],
+    "score_fad": 100,
+    "score_accessibilita": 100,
+    "score_trend": 80,
+    "score_budget": 80,
+    "score_totale": 94,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "f7b5ca1d662f",
     "titolo": "Autoproduzione di energia da fonti rinnovabili nelle PMI – Nuovo Sportello",
     "ente": "Europa Innovazione — PNRR",
@@ -396,6 +419,28 @@
     "region": "Nazionale"
   },
   {
+    "id": "5c6ded15a17b",
+    "titolo": "Spese ammissibili e rendicontazione nel Fondo Nuove Competenze: guida pratica per le imprese",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/fondo-nuove-competenze/spese-ammissibili-e-rendicontazione-nel-fondo-nuove-competenze-guida-pratica-per-le-imprese.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Il Fondo Nuove Competenze (FNC) è uno strumento strategico che consente alle imprese di finanziare percorsi di formazione per i propri dipendenti, coprendo il costo delle ore di lavoro dedicate all’aggiornamento delle competenze. Per beneficiare correttamente del contributo, è fondamentale conoscere nel dettaglio quali sono le spese ammissibili e come gestire correttamente la rendicontazione. Analizziamo ... L'articolo Spese ammissibili e rendicontazione nel Fondo Nuove Competenze: guida pratica per le imprese proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD"
+    ],
+    "score_fad": 80,
+    "score_accessibilita": 90,
+    "score_trend": 95,
+    "score_budget": 70,
+    "score_totale": 84,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "3e3a09172ebf",
     "titolo": "MSCA MaRaThoN 2026: a Padova il training intensivo per candidarsi alle Postdoctoral Fellowships",
     "ente": "Europa Innovazione — Formazione",
@@ -406,6 +451,52 @@
     "descrizione": "Supporto specialistico per ricercatori con Supervisor Unipd. Formazione gratuita e opportunità \"Seal of Excellence\". Domande entro il 9 marzo.",
     "tags": [
       "FAD"
+    ],
+    "score_fad": 100,
+    "score_accessibilita": 100,
+    "score_trend": 50,
+    "score_budget": 0,
+    "score_totale": 80,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "2411f17bcf4f",
+    "titolo": "Fondimpresa Avviso 4/2025: formazione aziendale sull’Intelligenza Artificiale",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/fondi-interprofessionali/fondimpresa-avviso-4-2025-formazione-aziendale-sullintelligenza-artificiale.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "L’Intelligenza Artificiale non è più una prospettiva futura, ma una leva concreta di innovazione che sta trasformando processi produttivi, modelli organizzativi e servizi. In questo contesto si inserisce l’Avviso 4/2025 di Fondimpresa, un’iniziativa pensata per sostenere la formazione continua dei lavoratori e accompagnare le imprese italiane nella transizione digitale basata sull’IA. Il bando mette a ... L'articolo Fondimpresa Avviso 4/2025: formazione aziendale sull’Intelligenza Artificiale proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD",
+      "Digitale"
+    ],
+    "score_fad": 80,
+    "score_accessibilita": 80,
+    "score_trend": 90,
+    "score_budget": 60,
+    "score_totale": 80,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "7cb77b31c97d",
+    "titolo": "Monitoraggio e rendicontazione nella formazione finanziata: la guida",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/consigli/monitoraggio-e-rendicontazione-nella-formazione-finanziata-la-guida.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Il monitoraggio e la rendicontazione nei progetti di formazione finanziata rappresentano due fasi cruciali per garantire la corretta gestione dei fondi pubblici e il successo delle iniziative formative. Che si tratti di fondi interprofessionali, programmi regionali, nazionali o europei, una gestione accurata di questi processi è indispensabile per assicurare trasparenza, conformità normativa ed efficacia degli ... L'articolo Monitoraggio e rendicontazione nella formazione finanziata: la guida proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD",
+      "Fondi Interprof."
     ],
     "score_fad": 100,
     "score_accessibilita": 100,
@@ -441,6 +532,50 @@
     "region": "Nazionale"
   },
   {
+    "id": "982f5d8bbaf9",
+    "titolo": "Fondoprofessioni: Avviso 1/2026 per la formazione finanziata di studi professionali e imprese",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/nuovi-avvisi/fondoprofessioni-avviso-1-2026-per-la-formazione-finanziata-di-studi-professionali-e-imprese.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "La formazione continua rappresenta oggi uno strumento strategico per la crescita degli studi professionali e delle imprese collegate. In questo contesto, Fondoprofessioni ha pubblicato il nuovo Avviso n. 1/2026, operativo dal 15 gennaio 2026, con l’obiettivo di sostenere percorsi formativi di qualità attraverso il finanziamento di piani aziendali strutturati e misurabili. Cos’è Fondoprofessioni e a ... L'articolo Fondoprofessioni: Avviso 1/2026 per la formazione finanziata di studi professionali e imprese proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD"
+    ],
+    "score_fad": 80,
+    "score_accessibilita": 90,
+    "score_trend": 70,
+    "score_budget": 60,
+    "score_totale": 78,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "fae49f694c55",
+    "titolo": "Proroga Fonacom Avviso 03/2025 UCS: date e novità",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/fondi-interprofessionali/proroga-fonacom-avviso-03-2025-ucs-date-e-novita.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Il Consiglio di Amministrazione del Fondo Fonarcom, nella seduta del 14 gennaio 2026, ha ufficialmente deliberato una proroga dei termini di trasmissione delle Proposte Formative relative all’Avviso 03/2025 – Seconda Finestra – Generalista UCS. La nuova scadenza per l’invio delle Proposte Formative (PF) è fissata al 21 gennaio 2026 alle ore 16:00, offrendo così un’ulteriore ... L'articolo Proroga Fonacom Avviso 03/2025 UCS: date e novità proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD"
+    ],
+    "score_fad": 90,
+    "score_accessibilita": 80,
+    "score_trend": 60,
+    "score_budget": 40,
+    "score_totale": 77,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "81414f4bf24e",
     "titolo": "Competenze & Innovazione – Seconda Edizione",
     "ente": "Europa Innovazione — Formazione",
@@ -465,6 +600,28 @@
     "region": "Nazionale"
   },
   {
+    "id": "7b9707c31e71",
+    "titolo": "Salute e sicurezza sul lavoro: novità per turismo e ristorazione nel 2026",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/fondi-interprofessionali/salute-e-sicurezza-sul-lavoro-novita-per-turismo-e-ristorazione-nel-2026.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "La tutela della salute e della sicurezza sul lavoro rappresenta uno dei pilastri fondamentali dell’ordinamento giuridico italiano. Nel corso degli anni, il legislatore ha costantemente aggiornato il quadro normativo per rispondere alle esigenze dei diversi settori produttivi, bilanciando la necessità di garantire ambienti di lavoro sicuri con la flessibilità organizzativa delle imprese. In questo contesto ... L'articolo Salute e sicurezza sul lavoro: novità per turismo e ristorazione nel 2026 proviene da Formazione Finanziata .",
+    "tags": [
+      "FAD"
+    ],
+    "score_fad": 80,
+    "score_accessibilita": 80,
+    "score_trend": 60,
+    "score_budget": 40,
+    "score_totale": 72,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "761c42c8e015",
     "titolo": "PR FESR 2021/2027 – Azione 1.1.1 A – Promozione ricerca collaborativa e trasferimento tecnologico – Avviso pubblico “Ripresa Sicilia Plus”",
     "ente": "Europa Innovazione — Formazione",
@@ -479,6 +636,26 @@
     "score_trend": 90,
     "score_budget": 80,
     "score_totale": 67,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "1448377b3cff",
+    "titolo": "Fondo Nuove Competenze e Fondimpresa: l’evento per scoprirne i vantaggi",
+    "ente": "Formazione Finanziata",
+    "fonte": "Formazione Finanziata",
+    "url": "https://www.formazionefinanziata.com/fondo-nuove-competenze/fondo-nuove-competenze-e-fondimpresa-levento-per-scoprirne-i-vantaggi.php",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Il futuro dell’economia italiana passa sempre più dalla valorizzazione del capitale umano. In questo contesto si inserisce l’evento “Fondimpresa e Fondo Nuove Competenze. L’economia della conoscenza e il valore capitale per il Paese”, in programma il 14 aprile 2026 a Roma. Un appuntamento chiave per il mondo del lavoro L’incontro si terrà presso il Palazzo ... L'articolo Fondo Nuove Competenze e Fondimpresa: l&#8217;evento per scoprirne i vantaggi proviene da Formazione Finanziata .",
+    "tags": [],
+    "score_fad": 50,
+    "score_accessibilita": 50,
+    "score_trend": 80,
+    "score_budget": 20,
+    "score_totale": 53,
     "data_inserimento": "2026-05-31",
     "analisi_ai": null,
     "stato": "Attivo",
