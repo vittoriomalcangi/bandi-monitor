@@ -46,5 +46,27 @@
     "analisi_ai": null,
     "stato": "Attivo",
     "region": "Lombardia"
+  },
+  {
+    "id": "2d992132e404",
+    "titolo": "Al via il programma europeo Women2Invest per colmare il divario di genere",
+    "ente": "Europa Innovazione — Bandi Europei",
+    "fonte": "Europa Innovazione — Bandi Europei",
+    "url": "https://www.europainnovazione.com/al-via-il-programma-europeo-women2invest-per-colmare-il-divario-di-genere/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Percorso intensivo online di 15 settimane per inserire donne con background STEAM nel mondo dei fondi d'investimento. Candidati entro il 7 giugno 2026.",
+    "tags": [
+      "FAD"
+    ],
+    "score_fad": 100,
+    "score_accessibilita": 100,
+    "score_trend": 80,
+    "score_budget": 20,
+    "score_totale": 88,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Europeo"
   }
 ]
