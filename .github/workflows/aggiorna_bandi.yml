@@ -1,17 +1,13 @@
 name: Aggiorna Bandi
-
 on:
   schedule:
     - cron: '0 1 * * *'
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   scraper:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,18 +19,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Debug secrets (solo per test)
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "❌ GEMINI_API_KEY è vuota o non trovata"
-          else
-            echo "✅ GEMINI_API_KEY trovata (lunghezza: ${#GEMINI_API_KEY})"
-          fi
+      - name: Debug secrets
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ]; then
+            echo "❌ GROQ_API_KEY è vuota o non trovata"
+          else
+            echo "✅ GROQ_API_KEY trovata (lunghezza: ${#GROQ_API_KEY})"
+          fi
+
       - name: Esegui scraper
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python scraper.py
 
       - name: Commit e push bandi.json aggiornato
