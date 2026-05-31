@@ -68,5 +68,52 @@
     "analisi_ai": null,
     "stato": "Attivo",
     "region": "Europeo"
+  },
+  {
+    "id": "2c493305708f",
+    "titolo": "Mobilità urbana sostenibile: bando EIT per corsi di formazione professionale",
+    "ente": "Europa Innovazione — Formazione",
+    "fonte": "Europa Innovazione — Formazione",
+    "url": "https://www.europainnovazione.com/mobilita-urbana-sostenibile-bando-eit-per-corsi-di-formazione-professionale/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "La Call Urban Mobility Explained (UMX) 2026-2028 di EIT Urban Mobility finanzia corsi di formazione professionale per la mobilità urbana sostenibile. Budget di 4M€. Scadenza: 30 settembre 2025.",
+    "tags": [
+      "FAD",
+      "Green"
+    ],
+    "score_fad": 70,
+    "score_accessibilita": 100,
+    "score_trend": 90,
+    "score_budget": 60,
+    "score_totale": 79,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "81414f4bf24e",
+    "titolo": "Competenze & Innovazione – Seconda Edizione",
+    "ente": "Europa Innovazione — Formazione",
+    "fonte": "Europa Innovazione — Formazione",
+    "url": "https://www.europainnovazione.com/competenze-innovazione-seconda-edizione/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Sostegno alla formazione per sostenibilità e innovazione nelle PMI lombarde. Contributi fino a 50.000€. Domande aperte su Bandi e Servizi.",
+    "tags": [
+      "FAD",
+      "Green",
+      "PMI"
+    ],
+    "score_fad": 70,
+    "score_accessibilita": 100,
+    "score_trend": 90,
+    "score_budget": 10,
+    "score_totale": 74,
+    "data_inserimento": "2026-05-31",
+    "analisi_ai": null,
+    "stato": "Attivo",
+    "region": "Nazionale"
   }
 ]
