@@ -154,30 +154,46 @@ def is_rilevante_locale(titolo, descrizione):
 # Groq API
 # ─────────────────────────────────────────────
 
-def chiama_groq(prompt, max_tokens=200):
+def chiama_groq(prompt, max_tokens=200, retry=4):
     if not GROQ_API_KEY:
         raise ValueError("GROQ_API_KEY non impostata")
 
-    body = json.dumps({
-        "model": GROQ_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": max_tokens,
-        "temperature": 0.1
-    }).encode("utf-8")
+    for tentativo in range(retry):
+        body = json.dumps({
+            "model": GROQ_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": max_tokens,
+            "temperature": 0.1
+        }).encode("utf-8")
 
-    conn = http.client.HTTPSConnection("api.groq.com")
-    conn.request("POST", "/openai/v1/chat/completions", body=body, headers={
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {GROQ_API_KEY}"
-    })
-    resp = conn.getresponse()
-    data = json.loads(resp.read().decode("utf-8"))
-    conn.close()
+        conn = http.client.HTTPSConnection("api.groq.com")
+        conn.request("POST", "/openai/v1/chat/completions", body=body, headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {GROQ_API_KEY}"
+        })
+        resp = conn.getresponse()
+        data = json.loads(resp.read().decode("utf-8"))
+        conn.close()
 
-    if "error" in data:
-        raise ValueError(f"Groq API error: {data['error']}")
+        if "error" in data:
+            err = data["error"]
+            # TPM rate limit: aspetta il tempo suggerito + margine
+            if err.get("code") == "rate_limit_exceeded":
+                msg = err.get("message", "")
+                attesa = 5  # default
+                match = re.search(r'try again in ([\d.]+)s', msg)
+                if match:
+                    attesa = float(match.group(1)) + 1.0
+                print(f"  ⏳ TPM limit — attendo {attesa:.1f}s (tentativo {tentativo+1}/{retry})…")
+                time.sleep(attesa)
+                continue
+            raise ValueError(f"Groq API error: {err}")
 
-    return data["choices"][0]["message"]["content"]
+        # Pausa fissa tra chiamate per restare sotto i 6000 TPM/min
+        time.sleep(3)
+        return data["choices"][0]["message"]["content"]
+
+    raise ValueError("Rate limit persistente dopo tutti i retry")
 
 def analizza_bando_ai(titolo, descrizione):
     """Una sola chiamata AI per bando: rilevanza + score."""
