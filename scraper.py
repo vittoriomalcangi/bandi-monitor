@@ -13,7 +13,7 @@ from urllib.request import urlopen, Request
 import http.client
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 BANDI_JSON = "bandi.json"
 
 FEED_RSS = [
