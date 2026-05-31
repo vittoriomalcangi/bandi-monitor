@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 BandiMonitor — Scraper RSS + Score AI (Gemini API - gratuita)
+v5 — fix rate limit: sleep + retry + verifica+score in una sola chiamata
 """
 
 import json
 import os
 import re
+import time
 import hashlib
 import xml.etree.ElementTree as ET
 from datetime import datetime, date
@@ -33,24 +35,24 @@ FEED_RSS = [
         "region": "Nazionale"
     },
     {
-        "nome": "Obiettivo Europa — Formazione e Lavoro",
-        "url": "https://www.obiettivoeuropa.com/feed/",
+        "nome": "Fondimpresa — News",
+        "url": "https://www.fondimpresa.it/feed/",
         "region": "Nazionale"
     },
     {
-        "nome": "Talentform — Formazione Finanziata",
-        "url": "https://www.talentform.it/feed/",
+        "nome": "For.Te — Fondo Formazione",
+        "url": "https://www.fondforte.it/feed/",
         "region": "Nazionale"
     },
     {
-        "nome": "Lavoro.gov.it — Notizie",
-        "url": "https://www.lavoro.gov.it/feed",
+        "nome": "ANPAL — Politiche Attive",
+        "url": "https://www.anpal.gov.it/feed",
         "region": "Nazionale"
     },
     {
-        "nome": "ItaliaOggi — Formazione",
-        "url": "https://www.italiaoggi.it/rss/formazione",
-        "region": "Nazionale"
+        "nome": "Regione Lazio — Bollettino",
+        "url": "https://www.regione.lazio.it/rss",
+        "region": "Lazio"
     },
 ]
 
@@ -135,7 +137,6 @@ def parse_feed(xml_text):
 
     except ET.ParseError as e:
         print(f"  ⚠ XML parse error: {e}")
-        # Fallback regex per feed malformati
         titoli = re.findall(r'<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>', xml_text, re.DOTALL)
         links = re.findall(r'<link[^>]*>(https?://[^<]+)</link>', xml_text)
         descs = re.findall(r'<description[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</description>', xml_text, re.DOTALL)
@@ -154,63 +155,92 @@ def is_rilevante_locale(titolo, descrizione):
     ha_neg = sum(1 for kw in KEYWORDS_NEGATIVI if kw in testo) >= 2
     return ha_pos and not ha_neg
 
-def chiama_gemini(prompt, max_tokens=300):
+def chiama_gemini(prompt, max_tokens=300, retry=3):
+    """Chiama Gemini con retry automatico in caso di rate limit."""
     if not GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY non impostata")
-    
-    url = f"/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
-    body = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.1}
-    }).encode("utf-8")
-    
-    conn = http.client.HTTPSConnection("generativelanguage.googleapis.com")
-    conn.request("POST", url, body=body, headers={"Content-Type": "application/json"})
-    resp = conn.getresponse()
-    data = json.loads(resp.read().decode("utf-8"))
-    conn.close()
-    
-    if "error" in data:
-        raise ValueError(f"Gemini API error: {data['error']}")
-    
-    return data["candidates"][0]["content"]["parts"][0]["text"]
 
-def verifica_rilevanza_ai(titolo, descrizione):
-    prompt = f"""Rispondi SOLO con SI o NO.
-Un bando è rilevante se riguarda formazione professionale erogabile in modalità e-learning, FAD, online, blended, video o materiale digitale fruibile autonomamente senza docente in presenza obbligatoria.
-TITOLO: {titolo}
-DESCRIZIONE: {descrizione[:400]}
-Rilevante?"""
-    try:
-        r = chiama_gemini(prompt, max_tokens=5).strip().upper()
-        return r.startswith("SI") or r == "SÌ" or r.startswith("YES")
-    except Exception as e:
-        print(f"  ⚠ AI relevance error: {e}")
-        return False
+    for tentativo in range(retry):
+        url = f"/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+        body = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.1}
+        }).encode("utf-8")
 
-def calcola_score_ai(titolo, descrizione):
+        conn = http.client.HTTPSConnection("generativelanguage.googleapis.com")
+        conn.request("POST", url, body=body, headers={"Content-Type": "application/json"})
+        resp = conn.getresponse()
+        data = json.loads(resp.read().decode("utf-8"))
+        conn.close()
+
+        if "error" in data:
+            errore = data["error"]
+            # Rate limit: aspetta e riprova
+            if errore.get("code") == 429:
+                attesa = 65  # aspetta 65 secondi (1 finestra da 1 min + margine)
+                # Prova a leggere il retryDelay dai dettagli
+                for detail in errore.get("details", []):
+                    if "retryDelay" in detail:
+                        try:
+                            attesa = int(re.search(r'\d+', detail["retryDelay"]).group()) + 5
+                        except:
+                            pass
+                print(f"  ⏳ Rate limit — attendo {attesa}s (tentativo {tentativo+1}/{retry})…")
+                time.sleep(attesa)
+                continue
+            raise ValueError(f"Gemini API error: {errore}")
+
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+    raise ValueError("Rate limit persistente dopo tutti i retry")
+
+def analizza_bando_ai(titolo, descrizione):
+    """
+    Una sola chiamata Gemini per: verifica rilevanza + score + tags.
+    Risparmia il 50% delle richieste API rispetto alla versione precedente.
+    """
     prompt = f"""Analizza questo bando italiano. Rispondi SOLO con JSON valido, nessun testo extra, nessun markdown.
+
 BANDO: {titolo}
 DESCRIZIONE: {descrizione[:600]}
-Formato richiesto: {{"fad":<0-100>,"accessibilita":<0-100>,"trend":<0-100>,"budget":<0-100>}}
-fad=ammette e-learning senza docente (0=solo presenza, 100=solo FAD)
-accessibilita=accessibile a privati senza accreditamento (0=richiede accreditamento, 100=aperto a tutti)
+
+Formato richiesto:
+{{
+  "rilevante": true/false,
+  "fad": <0-100>,
+  "accessibilita": <0-100>,
+  "trend": <0-100>,
+  "budget": <0-100>
+}}
+
+rilevante=true SOLO se il bando finanzia formazione professionale erogabile in e-learning, FAD, online, blended o video fruibile autonomamente
+fad=quanto il bando favorisce e-learning senza docente (0=solo presenza, 100=solo FAD)
+accessibilita=accessibile a privati senza accreditamento (0=richiede accreditamento regionale, 100=aperto a tutti)
 trend=argomento di tendenza AI/digitale/green (0=obsoleto, 100=molto trendy)
-budget=valore economico relativo (0=piccolo, 100=molto grande)"""
+budget=valore economico relativo (0=piccolo <50k, 100=molto grande >5M)"""
+
     try:
-        r = chiama_gemini(prompt, max_tokens=80).strip()
+        r = chiama_gemini(prompt, max_tokens=120).strip()
         r = re.sub(r'```[a-z]*', '', r).strip().strip('`')
-        # Estrai solo il JSON se c'è testo intorno
-        match = re.search(r'\{[^}]+\}', r)
+        match = re.search(r'\{[^}]+\}', r, re.DOTALL)
         if match:
             r = match.group(0)
-        scores = json.loads(r)
+        data = json.loads(r)
+
+        rilevante = bool(data.get("rilevante", False))
+        scores = {}
         for k in ["fad", "accessibilita", "trend", "budget"]:
-            scores[k] = max(0, min(100, int(scores.get(k, 50))))
-        return scores
+            scores[k] = max(0, min(100, int(data.get(k, 50))))
+
+        # Pausa DOPO ogni chiamata — rispetta il limite di 10 req/min
+        time.sleep(7)
+
+        return rilevante, scores
+
     except Exception as e:
-        print(f"  ⚠ AI score error: {e}")
-        return {"fad": 50, "accessibilita": 50, "trend": 50, "budget": 50}
+        print(f"  ⚠ AI error: {e}")
+        time.sleep(7)  # pausa anche in caso di errore
+        return False, {"fad": 50, "accessibilita": 50, "trend": 50, "budget": 50}
 
 def calcola_totale(s):
     return round(s["fad"]*0.5 + s["accessibilita"]*0.2 + s["trend"]*0.2 + s["budget"]*0.1)
@@ -245,7 +275,8 @@ def salva_bandi(bandi):
 
 def main():
     print(f"🕐 BandiMonitor — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print(f"📡 Feed: {len(FEED_RSS)} | Modello: Gemini {GEMINI_MODEL} (gratuito)\n")
+    print(f"📡 Feed: {len(FEED_RSS)} | Modello: Gemini {GEMINI_MODEL} (gratuito)")
+    print(f"⏱ Pausa AI: 7s/chiamata (limite: 10 req/min)\n")
 
     bandi_esistenti = carica_bandi()
     ids_esistenti = {b["id"] for b in bandi_esistenti}
@@ -276,17 +307,20 @@ def main():
             bid = genera_id(item["titolo"], item["url"])
             if bid in ids_esistenti:
                 continue
+            # Pre-filtro locale (senza API) — riduce le chiamate Gemini
             if not is_rilevante_locale(item["titolo"], item["descrizione"]):
                 continue
 
             print(f"   🔍 {item['titolo'][:65]}…")
 
-            if not verifica_rilevanza_ai(item["titolo"], item["descrizione"]):
+            # UNA SOLA chiamata AI per bando (era 2 in v4)
+            rilevante, scores = analizza_bando_ai(item["titolo"], item["descrizione"])
+
+            if not rilevante:
                 print(f"      ↳ Scartato dall'AI")
                 continue
 
             tot_nuovi += 1
-            scores = calcola_score_ai(item["titolo"], item["descrizione"])
             score_tot = calcola_totale(scores)
             tags = estrai_tags(item["titolo"], item["descrizione"], scores)
 
