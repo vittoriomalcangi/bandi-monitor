@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 BandiMonitor — Scraper RSS + Score AI
-v7 — Groq API (gratuita, ~1000 req/day, nessun rate limit pratico)
-     Registrazione: https://console.groq.com → API Keys → Create API Key
+v8 — prompt B2B content provider, nuovi feed, keyword aggiornate
 """
 
 import json
@@ -16,10 +15,11 @@ from urllib.request import urlopen, Request
 import http.client
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-GROQ_MODEL   = "llama-3.1-8b-instant"   # veloce, gratuito, ottimo per classificazione
+GROQ_MODEL   = "llama-3.1-8b-instant"
 BANDI_JSON   = "bandi.json"
 
 FEED_RSS = [
+    # ── Aggregatori nazionali ──────────────────────────────────────────
     {
         "nome": "Europa Innovazione — Bandi Nazionali",
         "url": "https://www.europainnovazione.com/category/bandi-nazionali/feed/",
@@ -50,26 +50,37 @@ FEED_RSS = [
         "url": "https://www.formazionefinanziata.com/feed/",
         "region": "Nazionale"
     },
+    # ── Regioni ────────────────────────────────────────────────────────
     {
-        "nome": "Agevolazione.net — Bandi",
-        "url": "https://www.agevolazione.net/feed/",
-        "region": "Nazionale"
+        "nome": "Europa Campania — FSE+ e Fondi Strutturali",
+        "url": "https://europa.regione.campania.it/feed/",
+        "region": "Campania"
     },
 ]
 
+# Pre-filtro locale — solo bandi che passano questo test vengono mandati all'AI
+# Riduce le chiamate API e i costi
 KEYWORDS_POSITIVI = [
     "formazione", "fad", "e-learning", "elearning", "corso", "corsi",
     "competenze", "digitale", "digitali", "fse", "fse+", "pnrr",
-    "fondi interprofessionali", "voucher formativo", "upskilling",
-    "reskilling", "aggiornamento professionale", "blended", "online",
-    "apprendimento", "qualificazione", "riqualificazione", "avviso",
-    "finanziamento formazione", "percorso formativo", "bando formazione"
+    "fondi interprofessionali", "fondo interprofessionale",
+    "voucher formativo", "voucher", "catalogo formativo",
+    "upskilling", "reskilling", "aggiornamento professionale",
+    "blended", "online", "apprendimento", "qualificazione",
+    "riqualificazione", "avviso", "finanziamento formazione",
+    "percorso formativo", "bando formazione", "ente di formazione",
+    "società di formazione", "piano formativo", "fondimpresa",
+    "fondirigenti", "fonarcom", "fon.ar.com", "for.te", "forte",
+    "fondoprofessioni", "fondo nuove competenze", "fnc",
+    "sicurezza sul lavoro", "soft skills", "intelligenza artificiale",
+    "transizione digitale", "transizione ecologica"
 ]
 
 KEYWORDS_NEGATIVI = [
     "appalto", "gara d'appalto", "lavori pubblici",
     "edilizia", "costruzione", "demolizione",
-    "concorso pubblico dipendenti", "selezione personale"
+    "concorso pubblico", "selezione personale",
+    "borse di studio", "dottorato", "assegno di ricerca"
 ]
 
 # ─────────────────────────────────────────────
@@ -89,7 +100,7 @@ def pulisci_testo(testo):
 
 def fetch_url(url, timeout=20):
     headers = {
-        "User-Agent": "Mozilla/5.0 BandiMonitor/1.0",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 BandiMonitor/1.0",
         "Accept": "application/rss+xml, application/xml, text/xml, */*"
     }
     try:
@@ -177,11 +188,10 @@ def chiama_groq(prompt, max_tokens=200, retry=4):
 
         if "error" in data:
             err = data["error"]
-            # TPM rate limit: aspetta il tempo suggerito + margine
             if err.get("code") == "rate_limit_exceeded":
-                msg = err.get("message", "")
-                attesa = 5  # default
-                match = re.search(r'try again in ([\d.]+)s', msg)
+                msg    = err.get("message", "")
+                attesa = 5
+                match  = re.search(r'try again in ([\d.]+)s', msg)
                 if match:
                     attesa = float(match.group(1)) + 1.0
                 print(f"  ⏳ TPM limit — attendo {attesa:.1f}s (tentativo {tentativo+1}/{retry})…")
@@ -189,60 +199,110 @@ def chiama_groq(prompt, max_tokens=200, retry=4):
                 continue
             raise ValueError(f"Groq API error: {err}")
 
-        # Pausa fissa tra chiamate per restare sotto i 6000 TPM/min
         time.sleep(3)
         return data["choices"][0]["message"]["content"]
 
     raise ValueError("Rate limit persistente dopo tutti i retry")
 
+# ─────────────────────────────────────────────
+# Prompt B2B — cuore del sistema
+# ─────────────────────────────────────────────
+
 def analizza_bando_ai(titolo, descrizione):
-    """Una sola chiamata AI per bando: rilevanza + score."""
-    prompt = f"""Analizza questo bando italiano. Rispondi SOLO con JSON valido, nessun testo extra.
+    """
+    Valuta il bando dal punto di vista di un content provider B2B:
+    produce corsi asincroni (video avatar, PDF, slide, LMS) da rivendere
+    a società di formazione che partecipano ai bandi.
+    """
+    prompt = f"""Sei un analista per un'azienda che produce corsi di formazione asincroni (video con avatar AI, PDF, slide, piattaforme LMS) da rivendere a società di formazione che partecipano a bandi pubblici.
+
+Analizza questo bando e rispondi SOLO con JSON valido, nessun testo extra, nessun markdown.
 
 BANDO: {titolo}
-DESCRIZIONE: {descrizione[:500]}
+DESCRIZIONE: {descrizione[:600]}
+
+Valuta secondo questi 4 criteri:
+
+1. "asincrono" (0-100): Il bando finanzia formazione erogabile tramite contenuti preregistrati acquistabili da catalogo (video, PDF, SCORM, LMS) senza docente live obbligatorio?
+   - 100 = esplicitamente ammette FAD/e-learning asincrono o catalogo acquistabile
+   - 50  = non specifica la modalità (potrebbe essere compatibile)
+   - 0   = richiede docente in presenza obbligatorio o laboratorio fisico
+
+2. "producibile" (0-100): L'argomento del bando è producibile con video+PDF senza esperti fisici presenti?
+   - 100 = digitale, AI, soft skills, sicurezza normativa, compliance, lingue, contabilità, marketing
+   - 50  = argomento generico o misto
+   - 0   = richiede laboratorio fisico, simulatori hardware, tirocinio, chirurgia, guida veicoli
+
+3. "mercato" (0-100): Quante società di formazione possono partecipare a questo bando?
+   - 100 = fondo interprofessionale nazionale o bando aperto a tutti gli enti di formazione
+   - 50  = bando regionale con accreditamento standard
+   - 0   = riservato a enti specifici, università, PA, o soggetti con requisiti molto restrittivi
+
+4. "timing" (0-100): Il bando è attuale e crea urgenza di acquisto contenuti?
+   - 100 = bando appena aperto o in scadenza entro 60 giorni
+   - 50  = bando aperto senza scadenza dichiarata
+   - 0   = bando scaduto o con scadenza lontana oltre 6 mesi
 
 Formato ESATTO (nessun testo prima o dopo):
-{{"rilevante": true/false, "fad": 0-100, "accessibilita": 0-100, "trend": 0-100, "budget": 0-100}}
+{{"rilevante": true/false, "asincrono": 0-100, "producibile": 0-100, "mercato": 0-100, "timing": 0-100}}
 
-rilevante=true SOLO se finanzia formazione erogabile in e-learning/FAD/online/blended senza docente in presenza obbligatoria
-fad: 0=solo presenza, 100=solo FAD/online
-accessibilita: 0=richiede accreditamento regionale, 100=aperto a chiunque
-trend: 0=argomento obsoleto, 100=AI/digitale/green molto trendy
-budget: 0=piccolo <50k euro, 100=molto grande >5M euro"""
+"rilevante" = true SOLO se il bando può generare domanda di acquisto corsi asincroni da parte di società di formazione"""
 
     try:
-        r = chiama_groq(prompt, max_tokens=80).strip()
+        r = chiama_groq(prompt, max_tokens=100).strip()
         r = re.sub(r'```[a-z]*', '', r).strip().strip('`')
         match = re.search(r'\{[^}]+\}', r, re.DOTALL)
         if match:
             r = match.group(0)
         data = json.loads(r)
+
         rilevante = bool(data.get("rilevante", False))
-        scores = {k: max(0, min(100, int(data.get(k, 50)))) for k in ["fad", "accessibilita", "trend", "budget"]}
+        scores = {k: max(0, min(100, int(data.get(k, 50))))
+                  for k in ["asincrono", "producibile", "mercato", "timing"]}
         return rilevante, scores
+
     except Exception as e:
         print(f"  ⚠ AI error: {e}")
-        return False, {"fad": 50, "accessibilita": 50, "trend": 50, "budget": 50}
+        return False, {"asincrono": 50, "producibile": 50, "mercato": 50, "timing": 50}
 
 # ─────────────────────────────────────────────
 # Score e tag
 # ─────────────────────────────────────────────
 
 def calcola_totale(s):
-    return round(s["fad"]*0.5 + s["accessibilita"]*0.2 + s["trend"]*0.2 + s["budget"]*0.1)
+    # Pesi: asincrono 50%, producibile 25%, mercato 15%, timing 10%
+    return round(
+        s["asincrono"]   * 0.50 +
+        s["producibile"] * 0.25 +
+        s["mercato"]     * 0.15 +
+        s["timing"]      * 0.10
+    )
 
 def estrai_tags(titolo, descrizione, scores):
     tags  = []
     testo = (titolo + " " + descrizione).lower()
-    if scores["fad"] >= 60:                                     tags.append("FAD")
-    if "pnrr" in testo:                                         tags.append("PNRR")
-    if "fse" in testo:                                          tags.append("FSE+")
-    if "digitale" in testo or "digital" in testo or " ai " in testo: tags.append("Digitale")
-    if "green" in testo or "sostenib" in testo:                 tags.append("Green")
-    if "voucher" in testo:                                      tags.append("Voucher")
-    if "pmi" in testo or "piccole imprese" in testo:            tags.append("PMI")
-    if "interprofessional" in testo:                            tags.append("Fondi Interprof.")
+
+    # Modalità
+    if scores["asincrono"] >= 70:                                           tags.append("FAD")
+    if "blended" in testo:                                                  tags.append("Blended")
+
+    # Finanziamento
+    if "pnrr" in testo:                                                     tags.append("PNRR")
+    if "fse" in testo:                                                      tags.append("FSE+")
+    if any(f in testo for f in ["fondimpresa","fondirigenti","fonarcom",
+                                 "for.te","forte","fondoprofessioni",
+                                 "fondo nuove competenze","interprofessional"]): tags.append("Fondi Interprof.")
+
+    # Argomento
+    if any(k in testo for k in ["digitale","digital","intelligenza artificiale"," ai ","ict"]): tags.append("Digitale/AI")
+    if any(k in testo for k in ["green","sostenib","ecolog","rinnovabil"]):  tags.append("Green")
+    if any(k in testo for k in ["sicurezza sul lavoro","salute e sicurezza"]): tags.append("Sicurezza")
+    if any(k in testo for k in ["soft skill","competenze trasversali","leadership","comunicazione"]): tags.append("Soft Skills")
+
+    # Target
+    if any(k in testo for k in ["pmi","piccole imprese","micro imprese"]):  tags.append("PMI")
+    if any(k in testo for k in ["voucher","catalogo"]):                      tags.append("Voucher/Catalogo")
+
     return tags
 
 # ─────────────────────────────────────────────
@@ -268,7 +328,8 @@ def salva_bandi(bandi):
 
 def main():
     print(f"🕐 BandiMonitor — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print(f"📡 Feed: {len(FEED_RSS)} | Modello: Groq {GROQ_MODEL} (gratuito)\n")
+    print(f"📡 Feed: {len(FEED_RSS)} | Modello: Groq {GROQ_MODEL}")
+    print(f"🎯 Modalità: B2B content provider — corsi asincroni\n")
 
     bandi_esistenti = carica_bandi()
     ids_esistenti   = {b["id"] for b in bandi_esistenti}
@@ -297,6 +358,7 @@ def main():
             bid = genera_id(item["titolo"], item["url"])
             if bid in ids_esistenti:
                 continue
+            # Pre-filtro locale — evita chiamate AI inutili
             if not is_rilevante_locale(item["titolo"], item["descrizione"]):
                 continue
 
@@ -307,9 +369,9 @@ def main():
                 print("      ↳ Scartato dall'AI")
                 continue
 
-            tot_nuovi  += 1
-            score_tot   = calcola_totale(scores)
-            tags        = estrai_tags(item["titolo"], item["descrizione"], scores)
+            tot_nuovi += 1
+            score_tot  = calcola_totale(scores)
+            tags       = estrai_tags(item["titolo"], item["descrizione"], scores)
 
             bando = {
                 "id": bid,
@@ -321,13 +383,18 @@ def main():
                 "budget": "",
                 "descrizione": item["descrizione"],
                 "tags": tags,
-                "score_fad": scores["fad"],
-                "score_accessibilita": scores["accessibilita"],
-                "score_trend": scores["trend"],
-                "score_budget": scores["budget"],
-                "score_totale": score_tot,
+                # Score B2B
+                "score_asincrono":   scores["asincrono"],
+                "score_producibile": scores["producibile"],
+                "score_mercato":     scores["mercato"],
+                "score_timing":      scores["timing"],
+                "score_totale":      score_tot,
+                # Campi legacy per compatibilità con app React esistente
+                "score_fad":           scores["asincrono"],
+                "score_accessibilita": scores["mercato"],
+                "score_trend":         scores["producibile"],
+                "score_budget":        scores["timing"],
                 "data_inserimento": date.today().isoformat(),
-                "analisi_ai": None,
                 "stato": "Attivo",
                 "region": feed["region"]
             }
@@ -335,8 +402,8 @@ def main():
             ids_esistenti.add(bid)
             print(f"      ✅ Score: {score_tot}/100 | Tags: {', '.join(tags)}")
 
-    oggi   = date.today().isoformat()
-    attivi = [b for b in bandi_esistenti if not b.get("scadenza") or b["scadenza"] >= oggi]
+    oggi    = date.today().isoformat()
+    attivi  = [b for b in bandi_esistenti if not b.get("scadenza") or b["scadenza"] >= oggi]
     rimossi = len(bandi_esistenti) - len(attivi)
     if rimossi:
         print(f"\n🗑 Rimossi {rimossi} bandi scaduti")
