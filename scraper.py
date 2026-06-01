@@ -415,5 +415,53 @@ def main():
     print(f"   Nuovi bandi:      {tot_nuovi}")
     print(f"   Database finale:  {len(attivi) + len(nuovi)} bandi")
 
+def ricalcola():
+    """Ri-analizza tutti i bandi esistenti con il nuovo prompt B2B."""
+    print(f"🔄 BandiMonitor — RICALCOLO SCORE — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    print(f"🎯 Prompt: B2B content provider — corsi asincroni\n")
+
+    bandi = carica_bandi()
+    if not bandi:
+        print("❌ Nessun bando nel database.")
+        return
+
+    print(f"📚 Bandi da ricalcolare: {len(bandi)}\n")
+    aggiornati = 0
+
+    for i, bando in enumerate(bandi, 1):
+        titolo = bando.get("titolo", "")
+        desc   = bando.get("descrizione", "")
+        print(f"[{i}/{len(bandi)}] {titolo[:65]}…")
+
+        rilevante, scores = analizza_bando_ai(titolo, desc)
+        score_tot = calcola_totale(scores)
+        tags      = estrai_tags(titolo, desc, scores)
+
+        bando["score_asincrono"]   = scores["asincrono"]
+        bando["score_producibile"] = scores["producibile"]
+        bando["score_mercato"]     = scores["mercato"]
+        bando["score_timing"]      = scores["timing"]
+        bando["score_totale"]      = score_tot
+        bando["tags"]              = tags
+        # Campi legacy per compatibilità app React
+        bando["score_fad"]           = scores["asincrono"]
+        bando["score_accessibilita"] = scores["mercato"]
+        bando["score_trend"]         = scores["producibile"]
+        bando["score_budget"]        = scores["timing"]
+
+        stato = "✅ rilevante" if rilevante else "⚪ non rilevante"
+        print(f"      {stato} | Score: {score_tot}/100 | Tags: {', '.join(tags)}")
+        aggiornati += 1
+
+    salva_bandi(bandi)
+    print(f"\n📊 Ricalcolo completato:")
+    print(f"   Bandi aggiornati: {aggiornati}")
+    print(f"   Database finale:  {len(bandi)} bandi")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--ricalcola":
+        ricalcola()
+    else:
+        main()
