@@ -801,7 +801,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
         <div style="font-family:var(--font-mono);font-size:12px;color:var(--muted)" id="modal-source"></div>
       </div>
       <a href="#" id="modal-link" class="modal-link" target="_blank" rel="noopener">
-        Apri bando
+        <span>Apri bando</span>
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M7 17L17 7M7 7h10v10"/>
         </svg>
@@ -954,8 +954,19 @@ function openModal(b) {
   document.getElementById('modal-source').textContent = b.fonte || b.source || '—';
 
   const link = document.getElementById('modal-link');
-  link.href = b.link || b.url || '#';
-  link.style.display = (b.link || b.url) ? 'inline-flex' : 'none';
+  const href = b.link || b.url || b.href || b.link_bando || b.url_bando || b.permalink || '';
+  if (href) {
+    link.href = href;
+    link.style.opacity = '1';
+    link.style.pointerEvents = 'auto';
+    link.querySelector('span').textContent = 'Apri bando';
+  } else {
+    link.href = '#';
+    link.style.opacity = '0.35';
+    link.style.pointerEvents = 'none';
+    link.querySelector('span').textContent = 'Link non disponibile';
+  }
+  link.style.display = 'inline-flex';
 
   // tags
   const tags = getTags(b);
