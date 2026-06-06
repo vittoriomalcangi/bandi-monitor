@@ -387,6 +387,57 @@
     "score_timing": 50
   },
   {
+    "id": "09cc01dd3842",
+    "titolo": "Fesr 2021-2027 – OS 1.4 – Azione 1.4.1 – Supporto alle start up innovative per lo sviluppo di competenze specialistiche per la transizione industriale, la specializzazione intelligente e l’imprenditorialità",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/fesr-2021-2027-os-1-4-azione-1-4-1-supporto-alle-start-up-innovative-per-lo-sviluppo-di-competenze-specialistiche-per-la-transizione-industriale-la-specializzazione-intelligente-e-limprendito/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Contributi a fondo perduto fino all'80% per temporary manager e formazione specialistica in Liguria. Domande dal 20 al 31 luglio 2026.",
+    "tags": [
+      "FAD"
+    ],
+    "score_asincrono": 100,
+    "score_producibile": 100,
+    "score_mercato": 100,
+    "score_timing": 50,
+    "score_totale": 95,
+    "score_fad": 100,
+    "score_accessibilita": 100,
+    "score_trend": 100,
+    "score_budget": 50,
+    "data_inserimento": "2026-06-06",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "fa34d06e2634",
+    "titolo": "NGI: opportunità di finanziamento per tecnologie digitali aperte e innovative",
+    "ente": "Europa Innovazione — Bandi Europei",
+    "fonte": "Europa Innovazione — Bandi Europei",
+    "url": "https://www.europainnovazione.com/ngi-opportunita-di-finanziamento-per-tecnologie-digitali-aperte-e-innovative/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Finanziamenti Horizon Europe in cascade funding per progetti tech su privacy dei pagamenti e cloud decentralizzato. Scadenza: 1 agosto 2026.",
+    "tags": [
+      "FAD",
+      "Digitale/AI"
+    ],
+    "score_asincrono": 100,
+    "score_producibile": 100,
+    "score_mercato": 100,
+    "score_timing": 50,
+    "score_totale": 95,
+    "score_fad": 100,
+    "score_accessibilita": 100,
+    "score_trend": 100,
+    "score_budget": 50,
+    "data_inserimento": "2026-06-06",
+    "stato": "Attivo",
+    "region": "Europeo"
+  },
+  {
     "id": "fae49f694c55",
     "titolo": "Proroga Fonacom Avviso 03/2025 UCS: date e novità",
     "ente": "Formazione Finanziata",
@@ -740,6 +791,31 @@
     "score_producibile": 100,
     "score_mercato": 50,
     "score_timing": 50
+  },
+  {
+    "id": "54a62a6e99ae",
+    "titolo": "GAL Appennino bolognese -Investimenti in neo imprese extra agricole (AB AS 6B)",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/gal-appennino-bolognese-investimenti-in-neo-imprese-extra-agricole-ab-as-6b/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Fondi a fondo perduto per micro/piccole imprese e professionisti che investono nella trasformazione di prodotti agroalimentari non Allegato I. Scadenza: 30 ottobre 2026.",
+    "tags": [
+      "PMI"
+    ],
+    "score_asincrono": 50,
+    "score_producibile": 100,
+    "score_mercato": 50,
+    "score_timing": 50,
+    "score_totale": 62,
+    "score_fad": 50,
+    "score_accessibilita": 50,
+    "score_trend": 100,
+    "score_budget": 50,
+    "data_inserimento": "2026-06-06",
+    "stato": "Attivo",
+    "region": "Nazionale"
   },
   {
     "id": "c0fe28f24c11",
