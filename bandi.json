@@ -590,6 +590,31 @@
     "score_timing": 100
   },
   {
+    "id": "c55a9b19c876",
+    "titolo": "Avviso Pubblico per la Presentazione di Manifestazioni di Interesse finalizzate alla partecipazione alle azioni di accompagnamento alla Costruzione di Reti di Imprese per Progetti di Innovazione sul bando ‘Aiuti per progetti di collaborazione per l’innovazione’",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/avviso-pubblico-per-la-presentazione-di-manifestazioni-di-interesse-finalizzate-alla-partecipazione-alle-azioni-di-accompagnamento-alla-costruzione-di-reti-di-imprese-per-progetti-di-innovazione-sul-b/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Supporto operativo gratuito per costituire reti d'impresa innovative e accedere ai futuri bandi FESR. Scadenza: 26/06/2026.",
+    "tags": [
+      "Digitale/AI"
+    ],
+    "score_asincrono": 50,
+    "score_producibile": 100,
+    "score_mercato": 50,
+    "score_timing": 100,
+    "score_totale": 68,
+    "score_fad": 50,
+    "score_accessibilita": 50,
+    "score_trend": 100,
+    "score_budget": 100,
+    "data_inserimento": "2026-06-10",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "d2aa6a4a1a19",
     "titolo": "Bando Digitalizzazione ed efficientamento produttivo delle imprese – Riapertura degli sportelli",
     "ente": "Europa Innovazione — Bandi Nazionali",
@@ -839,6 +864,29 @@
     "data_inserimento": "2026-06-07",
     "stato": "Attivo",
     "region": "Campania"
+  },
+  {
+    "id": "b597f140f79f",
+    "titolo": "‘PROGRAMMA COMPETENZE PER IL LAVORO E L’INNOVAZIONE A SUPPORTO DELLA CRESCITA’",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/programma-competenze-per-il-lavoro-e-linnovazione-a-supporto-della-crescita/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Contributi a fondo perduto in regime De Minimis per ridurre il mismatch di competenze in Sardegna. Domande dal 22/06/2026.",
+    "tags": [],
+    "score_asincrono": 50,
+    "score_producibile": 100,
+    "score_mercato": 50,
+    "score_timing": 50,
+    "score_totale": 62,
+    "score_fad": 50,
+    "score_accessibilita": 50,
+    "score_trend": 100,
+    "score_budget": 50,
+    "data_inserimento": "2026-06-10",
+    "stato": "Attivo",
+    "region": "Nazionale"
   },
   {
     "id": "c0fe28f24c11",
