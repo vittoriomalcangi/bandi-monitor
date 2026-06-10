@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 BandiMonitor — Scraper RSS + Score AI
-v8 — prompt B2B content provider, nuovi feed, keyword aggiornate
+v9 — prompt con gate duro, esempi negativi, argomento_corso
 """
 
 import json
@@ -58,15 +58,17 @@ FEED_RSS = [
     },
 ]
 
-# Pre-filtro locale — solo bandi che passano questo test vengono mandati all'AI
-# Riduce le chiamate API e i costi
+# ─────────────────────────────────────────────
+# Pre-filtro locale v9
+# ─────────────────────────────────────────────
+
 KEYWORDS_POSITIVI = [
     "formazione", "fad", "e-learning", "elearning", "corso", "corsi",
     "competenze", "digitale", "digitali", "fse", "fse+", "pnrr",
     "fondi interprofessionali", "fondo interprofessionale",
     "voucher formativo", "voucher", "catalogo formativo",
     "upskilling", "reskilling", "aggiornamento professionale",
-    "blended", "online", "apprendimento", "qualificazione",
+    "blended", "apprendimento", "qualificazione",
     "riqualificazione", "avviso", "finanziamento formazione",
     "percorso formativo", "bando formazione", "ente di formazione",
     "società di formazione", "piano formativo", "fondimpresa",
@@ -76,11 +78,24 @@ KEYWORDS_POSITIVI = [
     "transizione digitale", "transizione ecologica"
 ]
 
+# v9: soglia abbassata a 1 (era 2) + segnali di articolo informativo
 KEYWORDS_NEGATIVI = [
+    # Appalti e lavori fisici
     "appalto", "gara d'appalto", "lavori pubblici",
     "edilizia", "costruzione", "demolizione",
+    # Selezioni personale
     "concorso pubblico", "selezione personale",
-    "borse di studio", "dottorato", "assegno di ricerca"
+    "borse di studio", "dottorato", "assegno di ricerca",
+    # Segnali forti di articolo informativo
+    "come partecipare", "guida al bando", "come accedere ai fondi",
+    "tutto quello che devi sapere", "cosa sapere su",
+    "i requisiti per", "ecco come", "scopri come",
+    # Eventi non-bandi
+    "webinar gratuito", "convegno", "conferenza", "workshop gratuito",
+    "iscriviti all'evento", "posti limitati",
+    # Notizie su bandi già chiusi o assegnati
+    "bando scaduto", "graduatoria pubblicata", "beneficiari ammessi",
+    "finanziati i progetti", "aggiudicato",
 ]
 
 # ─────────────────────────────────────────────
@@ -158,7 +173,7 @@ def parse_feed(xml_text):
 def is_rilevante_locale(titolo, descrizione):
     testo  = (titolo + " " + descrizione).lower()
     ha_pos = any(kw in testo for kw in KEYWORDS_POSITIVI)
-    ha_neg = sum(1 for kw in KEYWORDS_NEGATIVI if kw in testo) >= 2
+    ha_neg = any(kw in testo for kw in KEYWORDS_NEGATIVI)  # v9: basta 1 (era >= 2)
     return ha_pos and not ha_neg
 
 # ─────────────────────────────────────────────
@@ -205,51 +220,84 @@ def chiama_groq(prompt, max_tokens=200, retry=4):
     raise ValueError("Rate limit persistente dopo tutti i retry")
 
 # ─────────────────────────────────────────────
-# Prompt B2B — cuore del sistema
+# Prompt B2B v9 — gate duro + esempi negativi
 # ─────────────────────────────────────────────
 
 def analizza_bando_ai(titolo, descrizione):
     """
-    Valuta il bando dal punto di vista di un content provider B2B:
-    produce corsi asincroni (video avatar, PDF, slide, LMS) da rivendere
-    a società di formazione che partecipano ai bandi.
+    Valuta il bando dal punto di vista di un content provider B2B.
+    v9: prompt a due stadi con gate duro, esempi negativi espliciti,
+    campo argomento_corso, motivo_esclusione nei log.
     """
-    prompt = f"""Sei un analista per un'azienda che produce corsi di formazione asincroni (video con avatar AI, PDF, slide, piattaforme LMS) da rivendere a società di formazione che partecipano a bandi pubblici.
+    prompt = f"""Sei un analista per un'azienda che produce corsi di formazione asincroni (video con avatar AI, PDF, slide, LMS) da rivendere a enti di formazione che partecipano a bandi pubblici.
 
-Analizza questo bando e rispondi SOLO con JSON valido, nessun testo extra, nessun markdown.
+Il tuo compito ha DUE STADI obbligatori.
 
-BANDO: {titolo}
-DESCRIZIONE: {descrizione[:600]}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STADIO 1 — CLASSIFICAZIONE (gate duro)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Rispondi prima a questa domanda: il testo è un BANDO/AVVISO reale con destinatari e finanziamento?
 
-Valuta secondo questi 4 criteri:
+Un BANDO REALE deve avere TUTTI questi elementi:
+  • Un ente che eroga finanziamenti o rimborsi
+  • Destinatari chiari (enti di formazione, aziende, lavoratori…)
+  • Un oggetto finanziabile (attività formative, progetti…)
+  • Una scadenza o una procedura di candidatura
 
-1. "asincrono" (0-100): Il bando finanzia formazione erogabile tramite contenuti preregistrati acquistabili da catalogo (video, PDF, SCORM, LMS) senza docente live obbligatorio?
-   - 100 = esplicitamente ammette FAD/e-learning asincrono o catalogo acquistabile
-   - 50  = non specifica la modalità (potrebbe essere compatibile)
-   - 0   = richiede docente in presenza obbligatorio o laboratorio fisico
+NON sono bandi — rispondi subito con rilevante: false e tutti gli score a 0:
+  • Articoli di notizia o commento ("Ecco i nuovi fondi per…", "Cosa cambia con il PNRR…")
+  • Guide e tutorial ("Come partecipare a un bando FSE", "5 passi per ottenere il voucher")
+  • Comunicati stampa su bandi già assegnati o chiusi
+  • Convegni, webinar, eventi formativi (anche se parlano di formazione finanziata)
+  • Annunci di selezione del personale o borse di studio accademiche
+  • Articoli che citano bandi come contesto ma non sono essi stessi un bando
 
-2. "producibile" (0-100): L'argomento del bando è producibile con video+PDF senza esperti fisici presenti?
-   - 100 = digitale, AI, soft skills, sicurezza normativa, compliance, lingue, contabilità, marketing
-   - 50  = argomento generico o misto
-   - 0   = richiede laboratorio fisico, simulatori hardware, tirocinio, chirurgia, guida veicoli
+Se il testo NON è un bando reale, restituisci SUBITO:
+{{"rilevante": false, "asincrono": 0, "producibile": 0, "mercato": 0, "timing": 0, "motivo_esclusione": "descrizione breve del perché non è un bando"}}
 
-3. "mercato" (0-100): Quante società di formazione possono partecipare a questo bando?
-   - 100 = fondo interprofessionale nazionale o bando aperto a tutti gli enti di formazione
-   - 50  = bando regionale con accreditamento standard
-   - 0   = riservato a enti specifici, università, PA, o soggetti con requisiti molto restrittivi
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STADIO 2 — SCORING (solo se supera il gate)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Se e solo se è un bando reale, valuta i 4 assi:
 
-4. "timing" (0-100): Il bando è attuale e crea urgenza di acquisto contenuti?
-   - 100 = bando appena aperto o in scadenza entro 60 giorni
-   - 50  = bando aperto senza scadenza dichiarata
-   - 0   = bando scaduto o con scadenza lontana oltre 6 mesi
+1. "asincrono" (0-100): Finanzia formazione acquistabile da catalogo (video, PDF, SCORM, LMS) senza docente live obbligatorio?
+   100 = esplicitamente ammette FAD / e-learning / catalogo acquistabile
+    70 = non specifica la modalità (potrebbe essere compatibile con FAD)
+    30 = preferisce presenza ma non la impone esplicitamente
+     0 = richiede docente in aula obbligatorio, laboratorio fisico, o tirocinio in presenza
 
-Formato ESATTO (nessun testo prima o dopo):
-{{"rilevante": true/false, "asincrono": 0-100, "producibile": 0-100, "mercato": 0-100, "timing": 0-100}}
+2. "producibile" (0-100): L'argomento è producibile come video + PDF senza presenza fisica?
+   100 = digitale, AI, soft skills, sicurezza normativa, compliance, lingue, contabilità, marketing, amministrazione
+    70 = argomento generico o misto (es. "competenze per il lavoro")
+    30 = mix di teorico e pratico con componente hands-on rilevante
+     0 = richiede laboratorio fisico, simulatori hardware, tirocinio in campo, chirurgia, guida veicoli, cantiere
 
-"rilevante" = true SOLO se il bando può generare domanda di acquisto corsi asincroni da parte di società di formazione"""
+3. "mercato" (0-100): Quante società di formazione accreditate possono candidarsi?
+   100 = fondo interprofessionale nazionale (Fondimpresa, Fondirigenti, For.Te…) o bando aperto a tutti gli enti di formazione
+    70 = bando regionale con accreditamento regionale standard
+    40 = bando regionale con requisiti specifici (settore, dimensione…)
+     0 = riservato a università, PA, soggetti attuatori unici, o con requisiti molto restrittivi
+
+4. "timing" (0-100): Crea urgenza reale di acquisto contenuti nei prossimi 2-3 mesi?
+   100 = bando appena aperto O scadenza entro 60 giorni
+    60 = bando aperto a sportello senza scadenza dichiarata
+    30 = scadenza tra 2 e 6 mesi
+     0 = bando scaduto, in fase di rendicontazione, o con scadenza oltre 6 mesi
+
+BANDO DA ANALIZZARE:
+Titolo: {titolo}
+Descrizione: {descrizione[:800]}
+
+Rispondi SOLO con JSON valido. Zero testo prima o dopo. Zero markdown. Zero commenti.
+
+Se è un bando reale:
+{{"rilevante": true, "asincrono": 0-100, "producibile": 0-100, "mercato": 0-100, "timing": 0-100, "argomento_corso": "titolo corso in 5-8 parole"}}
+
+Se NON è un bando reale:
+{{"rilevante": false, "asincrono": 0, "producibile": 0, "mercato": 0, "timing": 0, "motivo_esclusione": "breve motivo"}}"""
 
     try:
-        r = chiama_groq(prompt, max_tokens=100).strip()
+        r = chiama_groq(prompt, max_tokens=120).strip()
         r = re.sub(r'```[a-z]*', '', r).strip().strip('`')
         match = re.search(r'\{[^}]+\}', r, re.DOTALL)
         if match:
@@ -257,13 +305,21 @@ Formato ESATTO (nessun testo prima o dopo):
         data = json.loads(r)
 
         rilevante = bool(data.get("rilevante", False))
+
+        if not rilevante:
+            motivo = data.get("motivo_esclusione", "non specificato")
+            print(f"      ↳ Scartato: {motivo}")
+            return False, {"asincrono": 0, "producibile": 0, "mercato": 0, "timing": 0, "argomento_corso": ""}
+
         scores = {k: max(0, min(100, int(data.get(k, 50))))
                   for k in ["asincrono", "producibile", "mercato", "timing"]}
+        scores["argomento_corso"] = str(data.get("argomento_corso", "")).strip()
+
         return rilevante, scores
 
     except Exception as e:
         print(f"  ⚠ AI error: {e}")
-        return False, {"asincrono": 50, "producibile": 50, "mercato": 50, "timing": 50}
+        return False, {"asincrono": 0, "producibile": 0, "mercato": 0, "timing": 0, "argomento_corso": ""}
 
 # ─────────────────────────────────────────────
 # Score e tag
@@ -329,14 +385,14 @@ def salva_bandi(bandi):
 def main():
     print(f"🕐 BandiMonitor — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"📡 Feed: {len(FEED_RSS)} | Modello: Groq {GROQ_MODEL}")
-    print(f"🎯 Modalità: B2B content provider — corsi asincroni\n")
+    print(f"🎯 Modalità: B2B content provider — corsi asincroni (prompt v9)\n")
 
     bandi_esistenti = carica_bandi()
     ids_esistenti   = {b["id"] for b in bandi_esistenti}
     print(f"📚 Bandi nel database: {len(ids_esistenti)}")
 
     nuovi = []
-    tot_items = tot_nuovi = feed_ok = 0
+    tot_items = tot_nuovi = feed_ok = tot_scartati_locale = tot_scartati_ai = 0
 
     for feed in FEED_RSS:
         print(f"\n📡 {feed['nome']}…")
@@ -358,20 +414,21 @@ def main():
             bid = genera_id(item["titolo"], item["url"])
             if bid in ids_esistenti:
                 continue
-            # Pre-filtro locale — evita chiamate AI inutili
             if not is_rilevante_locale(item["titolo"], item["descrizione"]):
+                tot_scartati_locale += 1
                 continue
 
             print(f"   🔍 {item['titolo'][:65]}…")
             rilevante, scores = analizza_bando_ai(item["titolo"], item["descrizione"])
 
             if not rilevante:
-                print("      ↳ Scartato dall'AI")
+                tot_scartati_ai += 1
                 continue
 
             tot_nuovi += 1
-            score_tot  = calcola_totale(scores)
-            tags       = estrai_tags(item["titolo"], item["descrizione"], scores)
+            score_tot     = calcola_totale(scores)
+            tags          = estrai_tags(item["titolo"], item["descrizione"], scores)
+            argomento_corso = scores.pop("argomento_corso", "")
 
             bando = {
                 "id": bid,
@@ -383,6 +440,7 @@ def main():
                 "budget": "",
                 "descrizione": item["descrizione"],
                 "tags": tags,
+                "argomento_corso": argomento_corso,
                 # Score B2B
                 "score_asincrono":   scores["asincrono"],
                 "score_producibile": scores["producibile"],
@@ -400,7 +458,8 @@ def main():
             }
             nuovi.append(bando)
             ids_esistenti.add(bid)
-            print(f"      ✅ Score: {score_tot}/100 | Tags: {', '.join(tags)}")
+            corso_str = f" | Corso: {argomento_corso}" if argomento_corso else ""
+            print(f"      ✅ Score: {score_tot}/100 | Tags: {', '.join(tags)}{corso_str}")
 
     oggi    = date.today().isoformat()
     attivi  = [b for b in bandi_esistenti if not b.get("scadenza") or b["scadenza"] >= oggi]
@@ -410,15 +469,21 @@ def main():
 
     salva_bandi(attivi + nuovi)
     print(f"\n📊 Riepilogo:")
-    print(f"   Feed funzionanti: {feed_ok}/{len(FEED_RSS)}")
-    print(f"   Item RSS totali:  {tot_items}")
-    print(f"   Nuovi bandi:      {tot_nuovi}")
-    print(f"   Database finale:  {len(attivi) + len(nuovi)} bandi")
+    print(f"   Feed funzionanti:       {feed_ok}/{len(FEED_RSS)}")
+    print(f"   Item RSS totali:        {tot_items}")
+    print(f"   Scartati (pre-filtro):  {tot_scartati_locale}")
+    print(f"   Scartati (AI gate):     {tot_scartati_ai}")
+    print(f"   Nuovi bandi salvati:    {tot_nuovi}")
+    print(f"   Database finale:        {len(attivi) + len(nuovi)} bandi")
+
+# ─────────────────────────────────────────────
+# Ricalcola
+# ─────────────────────────────────────────────
 
 def ricalcola():
-    """Ri-analizza tutti i bandi esistenti con il nuovo prompt B2B."""
+    """Ri-analizza tutti i bandi esistenti con il prompt v9."""
     print(f"🔄 BandiMonitor — RICALCOLO SCORE — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print(f"🎯 Prompt: B2B content provider — corsi asincroni\n")
+    print(f"🎯 Prompt v9: gate duro + esempi negativi + argomento_corso\n")
 
     bandi = carica_bandi()
     if not bandi:
@@ -426,7 +491,7 @@ def ricalcola():
         return
 
     print(f"📚 Bandi da ricalcolare: {len(bandi)}\n")
-    aggiornati = 0
+    aggiornati = rimossi_ai = 0
 
     for i, bando in enumerate(bandi, 1):
         titolo = bando.get("titolo", "")
@@ -434,8 +499,23 @@ def ricalcola():
         print(f"[{i}/{len(bandi)}] {titolo[:65]}…")
 
         rilevante, scores = analizza_bando_ai(titolo, desc)
-        score_tot = calcola_totale(scores)
-        tags      = estrai_tags(titolo, desc, scores)
+
+        if not rilevante:
+            # Non rimuovere dal DB in --ricalcola: solo azzera lo score
+            # così l'utente può revisionare manualmente prima di cancellare
+            bando["score_totale"]    = 0
+            bando["score_asincrono"] = 0
+            bando["score_producibile"] = 0
+            bando["score_mercato"]   = 0
+            bando["score_timing"]    = 0
+            bando["tags"]            = ["⚠ Non-bando"]
+            bando["argomento_corso"] = ""
+            rimossi_ai += 1
+            continue
+
+        score_tot       = calcola_totale(scores)
+        tags            = estrai_tags(titolo, desc, scores)
+        argomento_corso = scores.pop("argomento_corso", "")
 
         bando["score_asincrono"]   = scores["asincrono"]
         bando["score_producibile"] = scores["producibile"]
@@ -443,20 +523,25 @@ def ricalcola():
         bando["score_timing"]      = scores["timing"]
         bando["score_totale"]      = score_tot
         bando["tags"]              = tags
-        # Campi legacy per compatibilità app React
+        bando["argomento_corso"]   = argomento_corso
+        # Campi legacy
         bando["score_fad"]           = scores["asincrono"]
         bando["score_accessibilita"] = scores["mercato"]
         bando["score_trend"]         = scores["producibile"]
         bando["score_budget"]        = scores["timing"]
 
-        stato = "✅ rilevante" if rilevante else "⚪ non rilevante"
-        print(f"      {stato} | Score: {score_tot}/100 | Tags: {', '.join(tags)}")
+        corso_str = f" | Corso: {argomento_corso}" if argomento_corso else ""
+        print(f"      ✅ Score: {score_tot}/100 | Tags: {', '.join(tags)}{corso_str}")
         aggiornati += 1
 
     salva_bandi(bandi)
     print(f"\n📊 Ricalcolo completato:")
-    print(f"   Bandi aggiornati: {aggiornati}")
-    print(f"   Database finale:  {len(bandi)} bandi")
+    print(f"   Bandi aggiornati:      {aggiornati}")
+    print(f"   Azzerati (non-bandi):  {rimossi_ai}  ← verifica manuale consigliata")
+    print(f"   Database finale:       {len(bandi)} bandi")
+    if rimossi_ai:
+        print(f"\n💡 Suggerimento: filtra per score = 0 nella dashboard")
+        print(f"   e rimuovi manualmente i falsi positivi dal bandi.json")
 
 
 if __name__ == "__main__":
