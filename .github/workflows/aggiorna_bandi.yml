@@ -17,6 +17,9 @@ on:
           - normale        # aggiunge solo i nuovi bandi
           - ricalcola      # ricalcola tutti i bandi con il prompt attuale
 
+permissions:
+  contents: write
+
 jobs:
   aggiorna:
     runs-on: ubuntu-latest
