@@ -1,39 +1,55 @@
 name: Aggiorna Bandi
+
 on:
+  # ── Run notturno automatico ──────────────────────────────────────────
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 1 * * *'   # ogni notte all'01:00 UTC
+
+  # ── Trigger manuale da GitHub UI ────────────────────────────────────
   workflow_dispatch:
-permissions:
-  contents: write
+    inputs:
+      modalita:
+        description: 'Modalità di esecuzione'
+        required: true
+        default: 'normale'
+        type: choice
+        options:
+          - normale        # aggiunge solo i nuovi bandi
+          - ricalcola      # ricalcola tutti i bandi con il prompt attuale
+
 jobs:
-  scraper:
+  aggiorna:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Debug secrets
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          if [ -z "$GROQ_API_KEY" ]; then
-            echo "❌ GROQ_API_KEY è vuota o non trovata"
-          else
-            echo "✅ GROQ_API_KEY trovata (lunghezza: ${#GROQ_API_KEY})"
-          fi
+
       - name: Esegui scraper
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python scraper.py
-      - name: Commit e push bandi.json aggiornato
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "BandiMonitor Bot"
+          # Determina la modalità:
+          # - nei run notturni (schedule) → sempre normale
+          # - nei run manuali → usa l'input scelto dall'utente
+          MODALITA="${{ github.event.inputs.modalita }}"
+          if [ "$MODALITA" = "ricalcola" ]; then
+            echo "🔄 Modalità: RICALCOLA (tutti i bandi esistenti)"
+            python scraper.py --ricalcola
+          else
+            echo "▶ Modalità: NORMALE (solo nuovi bandi)"
+            python scraper.py
+          fi
+
+      - name: Commit e push bandi.json
+        run: |
+          git config user.name  "BandiMonitor Bot"
+          git config user.email "bot@bandimonitor"
           git add bandi.json
-          git diff --staged --quiet || git commit -m "🤖 Ricalcolo score B2B - $(date '+%Y-%m-%d %H:%M')"
+          git diff --staged --quiet || git commit -m "update: bandi $(date +'%Y-%m-%d %H:%M')"
           git push
