@@ -6,26 +6,34 @@
 <title>BandiMonitor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0d0f11;
-  --bg2: #141618;
-  --bg3: #1c1f23;
-  --bg4: #242830;
-  --line: rgba(255,255,255,0.07);
-  --text: #e8e6e0;
-  --muted: #787570;
-  --dim: #4a4845;
-  --accent: #c8f040;
-  --accent2: #40c8f0;
-  --hot: #ff6b3d;
-  --warm: #ffb547;
-  --cool: #40c8f0;
+  --bg:      #f4f5f7;
+  --bg2:     #ffffff;
+  --bg3:     #f0f1f3;
+  --bg4:     #e4e6ea;
+  --line:    #e0e2e7;
+  --text:    #1a1c21;
+  --muted:   #5c6070;
+  --dim:     #9499a8;
+  --accent:  #2563eb;
+  --accent-light: #eff4ff;
+  --green:   #16a34a;
+  --green-light: #f0fdf4;
+  --amber:   #d97706;
+  --amber-light: #fffbeb;
+  --red:     #dc2626;
+  --red-light: #fef2f2;
+  --cool:    #0891b2;
+  --cool-light: #ecfeff;
   --font-display: 'DM Serif Display', Georgia, serif;
-  --font-ui: 'Syne', sans-serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
   --font-mono: 'DM Mono', monospace;
   --r: 10px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,20 +45,21 @@ body {
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── HEADER ── */
 header {
+  background: var(--bg2);
   border-bottom: 1px solid var(--line);
-  padding: 20px 32px;
+  padding: 14px 28px;
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
   position: sticky;
   top: 0;
-  background: var(--bg);
   z-index: 100;
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
 }
 
 .logo {
@@ -58,7 +67,8 @@ header {
   font-size: 22px;
   color: var(--text);
   white-space: nowrap;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
 }
 .logo span { color: var(--accent); }
 
@@ -69,47 +79,55 @@ header {
   border: 1px solid var(--line);
   border-radius: var(--r);
   overflow: hidden;
+  background: var(--bg3);
 }
 .stat {
   flex: 1;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-right: 1px solid var(--line);
-  transition: background 0.2s;
 }
 .stat:last-child { border-right: none; }
-.stat:hover { background: var(--bg3); }
 .stat-val {
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 500;
   color: var(--text);
-  line-height: 1;
+  line-height: 1.1;
 }
 .stat-val.hot { color: var(--accent); }
 .stat-label {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--dim);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: 3px;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
 }
 
-.header-right {
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.last-updated {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 5px;
+  white-space: nowrap;
 }
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 .search-wrap svg {
-  position: absolute;
-  left: 12px;
-  top: 50%;
+  position: absolute; left: 10px; top: 50%;
   transform: translateY(-50%);
-  color: var(--muted);
-  pointer-events: none;
+  color: var(--dim); pointer-events: none;
 }
 #search {
   background: var(--bg3);
@@ -118,41 +136,52 @@ header {
   color: var(--text);
   font-family: var(--font-ui);
   font-size: 13px;
-  padding: 9px 14px 9px 36px;
+  padding: 8px 12px 8px 32px;
   outline: none;
-  width: 220px;
-  transition: border-color 0.2s, width 0.3s;
+  width: 200px;
+  transition: border-color 0.2s, box-shadow 0.2s, width 0.3s;
 }
-#search:focus { border-color: var(--accent); width: 280px; }
+#search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  width: 260px;
+}
 #search::placeholder { color: var(--dim); }
 
-.btn-legend {
+.burger {
+  display: none;
   background: var(--bg3);
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--muted);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  padding: 9px 14px;
+  padding: 8px 10px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: border-color 0.2s, color 0.2s;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
 }
-.btn-legend:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── SIDEBAR OVERLAY ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 150;
+}
+.sidebar-overlay.open { display: block; }
 
 /* ── MAIN LAYOUT ── */
 main {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  min-height: calc(100vh - 65px);
+  grid-template-columns: 210px 1fr;
+  min-height: calc(100vh - 61px);
 }
 
 /* ── SIDEBAR ── */
 aside {
+  background: var(--bg2);
   border-right: 1px solid var(--line);
-  padding: 28px 20px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -160,23 +189,20 @@ aside {
 
 .sidebar-section h3 {
   font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--dim);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.filter-group { display: flex; flex-direction: column; gap: 2px; }
 
 .filter-btn {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-radius: 7px;
   border: none;
   background: transparent;
@@ -188,126 +214,85 @@ aside {
   text-align: left;
 }
 .filter-btn:hover { background: var(--bg3); color: var(--text); }
-.filter-btn.active { background: var(--bg3); color: var(--text); }
-.filter-btn.active .fb-dot { opacity: 1; }
-.fb-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-}
+.filter-btn.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
 .fb-count {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--dim);
-  margin-right: 6px;
+  background: var(--bg3);
+  padding: 1px 6px;
+  border-radius: 10px;
 }
+.filter-btn.active .fb-count { background: rgba(37,99,235,0.15); color: var(--accent); }
 
-/* Score range slider */
-.range-wrap { padding: 4px 0; }
+/* Range slider */
+.range-wrap { padding: 2px 0; }
 .range-labels {
   display: flex;
   justify-content: space-between;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--muted);
+  color: var(--dim);
   margin-bottom: 8px;
 }
 .range-labels span { color: var(--accent); font-weight: 500; }
 input[type=range] {
   -webkit-appearance: none;
-  width: 100%;
-  height: 3px;
+  width: 100%; height: 4px;
   border-radius: 2px;
   background: var(--bg4);
-  outline: none;
-  cursor: pointer;
+  outline: none; cursor: pointer;
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px; height: 14px;
+  width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.3);
   transition: transform 0.15s;
 }
-input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
-/* Asse legenda sidebar */
+/* Legenda assi sidebar */
 .asse-list { display: flex; flex-direction: column; gap: 8px; }
 .asse-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--muted);
 }
-.asse-dot {
-  width: 8px; height: 8px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-.asse-peso {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--dim);
-}
+.asse-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.asse-peso { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--dim); }
 
-/* ── CONTENT AREA ── */
-.content {
-  padding: 28px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+/* ── CONTENT ── */
+.content { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
 
-/* Toolbar sopra cards */
 .toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 12px;
 }
-.toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.result-count {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--muted);
-}
+.result-count { font-size: 13px; color: var(--muted); }
 
 .sort-btns {
-  display: flex;
-  gap: 4px;
+  display: flex; gap: 3px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 3px;
   background: var(--bg2);
 }
 .sort-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  padding: 5px 12px;
-  border-radius: 5px;
-  cursor: pointer;
+  background: transparent; border: none;
+  color: var(--muted); font-family: var(--font-ui);
+  font-size: 12px; padding: 5px 12px;
+  border-radius: 5px; cursor: pointer;
   transition: all 0.15s;
 }
-.sort-btn.active { background: var(--bg4); color: var(--text); }
+.sort-btn.active { background: var(--bg3); color: var(--text); font-weight: 500; }
 
 /* ── CARDS GRID ── */
 #cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
 }
 
 /* BANDO CARD */
@@ -315,361 +300,296 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
   background: var(--bg2);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 22px;
+  padding: 20px;
   cursor: pointer;
   transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-  position: relative;
-  overflow: hidden;
   animation: fadeIn 0.3s ease both;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.bando-card:hover {
-  border-color: rgba(200,240,64,0.25);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-}
-.bando-card.priority { border-color: rgba(200,240,64,0.15); }
-.bando-card.priority::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-}
-
-.card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.score-badge {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  width: 52px;
+  gap: 12px;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.bando-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.bando-card.priority {
+  border-left: 3px solid var(--accent);
+}
+
+/* Card top: score badge + titolo */
+.card-top {
+  display: flex; align-items: flex-start;
+  gap: 12px;
+}
+.score-badge {
+  display: flex; flex-direction: column;
+  align-items: center; flex-shrink: 0;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 52px;
 }
 .score-num {
   font-family: var(--font-mono);
-  font-size: 26px;
-  font-weight: 500;
+  font-size: 22px; font-weight: 500;
   line-height: 1;
 }
 .score-label {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
+  font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--dim);
   margin-top: 2px;
 }
-
 .card-title {
-  font-family: var(--font-display);
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--text);
+  font-size: 15px; font-weight: 600;
+  line-height: 1.35; color: var(--text);
   flex: 1;
 }
 
-/* Score color by value */
-.s100 { color: var(--accent); }
-.s90  { color: #a8e050; }
-.s80  { color: var(--warm); }
-.s70  { color: #f0a840; }
-.s-low { color: var(--muted); }
+/* Argomento corso — elemento chiave */
+.card-corso {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--accent-light);
+  border: 1px solid rgba(37,99,235,0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.card-corso-icon {
+  font-size: 14px; flex-shrink: 0;
+}
+.card-corso-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--accent); display: block;
+  margin-bottom: 1px;
+}
+.card-corso-text {
+  font-size: 13px; font-weight: 500;
+  color: var(--text); line-height: 1.3;
+}
 
-/* Mini score bar */
+/* Score bar */
 .score-bar-wrap {
-  margin: 14px 0 12px;
-  height: 4px;
-  background: var(--bg4);
-  border-radius: 2px;
-  overflow: hidden;
+  height: 3px; background: var(--bg4);
+  border-radius: 2px; overflow: hidden;
 }
-.score-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
-}
+.score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
 
-/* Asse pills */
-.asse-pills {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
+/* Pill assi */
+.asse-pills { display: flex; gap: 5px; flex-wrap: wrap; }
 .asse-pill {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid;
+  font-size: 11px; font-family: var(--font-mono);
+  padding: 2px 7px; border-radius: 4px;
+  border: 1px solid; font-weight: 500;
 }
-.pill-asincrono { background: rgba(200,240,64,0.08); color: #a8e050; border-color: rgba(200,240,64,0.2); }
-.pill-producibile { background: rgba(64,200,240,0.08); color: var(--cool); border-color: rgba(64,200,240,0.2); }
-.pill-mercato { background: rgba(255,181,71,0.08); color: var(--warm); border-color: rgba(255,181,71,0.2); }
-.pill-timing { background: rgba(255,107,61,0.08); color: var(--hot); border-color: rgba(255,107,61,0.2); }
+.pill-asincrono { background: var(--green-light); color: var(--green); border-color: rgba(22,163,74,0.2); }
+.pill-producibile { background: var(--cool-light); color: var(--cool); border-color: rgba(8,145,178,0.2); }
+.pill-mercato { background: var(--amber-light); color: var(--amber); border-color: rgba(217,119,6,0.2); }
+.pill-timing { background: var(--red-light); color: var(--red); border-color: rgba(220,38,38,0.2); }
 
-.card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+/* Card meta: tag + data */
+.card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .tag {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: var(--bg4);
-  color: var(--muted);
+  font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 4px;
+  background: var(--bg3); color: var(--muted);
 }
-.tag.fad { background: rgba(200,240,64,0.1); color: #a8e050; }
-.tag.pnrr { background: rgba(64,200,240,0.1); color: var(--cool); }
-.tag.fse { background: rgba(255,181,71,0.1); color: var(--warm); }
-.tag.eu { background: rgba(100,120,240,0.1); color: #9090f0; }
-
-.card-date {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--dim);
-}
+.tag.fad { background: var(--green-light); color: var(--green); }
+.tag.pnrr { background: var(--accent-light); color: var(--accent); }
+.tag.fse { background: var(--amber-light); color: var(--amber); }
+.tag.eu { background: var(--cool-light); color: var(--cool); }
+.card-date { font-size: 11px; font-family: var(--font-mono); color: var(--dim); white-space: nowrap; }
 
 /* ── MODAL ── */
 .modal-overlay {
   display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(6px);
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
   z-index: 200;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   padding: 24px;
 }
 .modal-overlay.open { display: flex; }
 
 .modal {
   background: var(--bg2);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--line);
   border-radius: 18px;
-  width: 100%;
-  max-width: 680px;
+  width: 100%; max-width: 660px;
   max-height: 88vh;
   overflow-y: auto;
-  padding: 36px;
-  animation: modalIn 0.25s cubic-bezier(0.16,1,0.3,1);
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.22s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
 }
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.96) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+@keyframes modalIn { from{opacity:0;transform:scale(0.97) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 28px;
-}
-.modal-title {
-  font-family: var(--font-display);
-  font-size: 26px;
-  line-height: 1.2;
-  flex: 1;
-}
-.modal-score {
-  font-family: var(--font-mono);
-  font-size: 48px;
-  font-weight: 500;
-  line-height: 1;
-  flex-shrink: 0;
-}
 .modal-close {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  background: var(--bg4);
-  border: none;
-  color: var(--muted);
-  font-size: 20px;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: color 0.15s, background 0.15s;
+  position: absolute; top: 18px; right: 20px;
+  background: var(--bg3); border: none;
+  color: var(--muted); font-size: 18px;
+  width: 30px; height: 30px; border-radius: 50%;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
 }
 .modal-close:hover { background: var(--bg4); color: var(--text); }
 
-.modal-section { margin-bottom: 28px; }
-.modal-section h4 {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--dim);
-  margin-bottom: 14px;
+.modal-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  margin-bottom: 20px;
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 24px; line-height: 1.25;
+  color: var(--text); flex: 1;
+}
+.modal-score-wrap { text-align: center; flex-shrink: 0; }
+.modal-score {
+  font-family: var(--font-mono);
+  font-size: 44px; font-weight: 500;
+  line-height: 1;
+}
+.modal-score-sub {
+  font-size: 11px; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 0.08em;
 }
 
-/* Assi breakdown nel modal */
-.asse-breakdown { display: flex; flex-direction: column; gap: 12px; }
+/* Argomento corso nel modal */
+.modal-corso {
+  background: var(--accent-light);
+  border: 1px solid rgba(37,99,235,0.2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.modal-corso-icon { font-size: 20px; }
+.modal-corso-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--accent); margin-bottom: 3px;
+}
+.modal-corso-text {
+  font-size: 15px; font-weight: 600;
+  color: var(--text);
+}
+
+.modal-section { margin-bottom: 24px; }
+.modal-section h4 {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--dim); margin-bottom: 12px;
+}
+
+.asse-breakdown { display: flex; flex-direction: column; gap: 10px; }
 .asse-row {
   display: grid;
-  grid-template-columns: 100px 1fr 50px;
-  align-items: center;
-  gap: 14px;
+  grid-template-columns: 110px 1fr 44px;
+  align-items: center; gap: 12px;
 }
-.asse-name {
-  font-size: 12px;
-  color: var(--muted);
-}
+.asse-name { font-size: 12px; color: var(--muted); }
 .asse-bar-track {
-  height: 6px;
-  background: var(--bg4);
-  border-radius: 3px;
-  overflow: hidden;
+  height: 6px; background: var(--bg4);
+  border-radius: 3px; overflow: hidden;
 }
 .asse-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+  height: 100%; border-radius: 3px;
+  transition: width 0.7s cubic-bezier(0.16,1,0.3,1);
 }
 .asse-val {
   font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 13px; font-weight: 500;
   text-align: right;
 }
 
 .modal-desc {
-  font-size: 14px;
-  color: var(--muted);
+  font-size: 14px; color: var(--muted);
   line-height: 1.7;
-  padding: 16px;
+  padding: 14px 16px;
   background: var(--bg3);
   border-radius: 10px;
   border: 1px solid var(--line);
 }
 
-.modal-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--accent);
-  color: #0d0f11;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 12px 22px;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: opacity 0.15s;
+.modal-footer {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 12px;
+  flex-wrap: wrap; margin-top: 4px;
 }
-.modal-link:hover { opacity: 0.85; }
+.modal-source-wrap { }
+.modal-source-label {
+  font-size: 10px; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+.modal-source-val {
+  font-family: var(--font-mono);
+  font-size: 12px; color: var(--muted);
+}
 
-/* ── EMPTY STATE ── */
-.empty-state {
-  grid-column: 1/-1;
-  text-align: center;
-  padding: 80px 40px;
-  color: var(--dim);
+.modal-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--accent); color: #fff;
+  font-family: var(--font-ui); font-size: 13px;
+  font-weight: 600; padding: 10px 20px;
+  border-radius: 8px; text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.25);
 }
-.empty-state p { font-family: var(--font-display); font-size: 24px; font-style: italic; margin-bottom: 8px; color: var(--muted); }
+.modal-link:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* Score colors */
+.c-blue   { color: var(--accent) !important; }
+.c-green  { color: var(--green) !important; }
+.c-amber  { color: var(--amber) !important; }
+.c-red    { color: var(--red) !important; }
+.c-muted  { color: var(--muted) !important; }
+
+/* Empty state */
+.empty-state {
+  grid-column: 1/-1; text-align: center;
+  padding: 72px 40px; color: var(--dim);
+}
+.empty-state p {
+  font-family: var(--font-display);
+  font-size: 22px; font-style: italic;
+  margin-bottom: 8px; color: var(--muted);
+}
 .empty-state small { font-size: 13px; }
 
-/* ── SCROLLBAR ── */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
 
-/* ── LAST UPDATED ── */
-.last-updated {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--dim);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-
-/* ── BURGER BUTTON (mobile only) ── */
-.burger {
-  display: none;
-  background: var(--bg3);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--muted);
-  padding: 8px 11px;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-size: 16px;
-  line-height: 1;
-}
-
-/* ── SIDEBAR OVERLAY (mobile) ── */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 150;
-}
-.sidebar-overlay.open { display: block; }
-
 /* ── RESPONSIVE ── */
 @media (max-width: 700px) {
-
-  header {
-    padding: 12px 16px;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .stats-bar {
-    order: 3;
-    width: 100%;
-    flex: none;
-  }
-  .stat { padding: 8px 10px; }
+  header { padding: 12px 16px; gap: 10px; flex-wrap: wrap; }
+  .stats-bar { order: 3; width: 100%; flex: none; }
+  .stat { padding: 7px 10px; }
   .stat-val { font-size: 15px; }
-  .stat-label { font-size: 10px; }
-
   .header-right { margin-left: auto; gap: 8px; }
   #search { width: 130px; }
-  #search:focus { width: 150px; }
+  #search:focus { width: 155px; }
   .last-updated { display: none; }
   .burger { display: block; }
 
-  /* Layout: una sola colonna */
   main { grid-template-columns: 1fr; }
 
-  /* Sidebar: drawer da sinistra */
   aside {
-    position: fixed;
-    top: 0; left: -270px;
-    width: 260px;
-    height: 100%;
-    z-index: 160;
+    position: fixed; top: 0; left: -270px;
+    width: 260px; height: 100%; z-index: 160;
     background: var(--bg2);
-    border-right: 1px solid rgba(255,255,255,0.1);
+    border-right: 1px solid var(--line);
     overflow-y: auto;
     transition: left 0.28s cubic-bezier(0.16,1,0.3,1);
     padding: 24px 16px;
+    box-shadow: var(--shadow-lg);
   }
   aside.open { left: 0; }
 
@@ -678,20 +598,15 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
   .toolbar { flex-wrap: wrap; gap: 8px; }
   .sort-btn { font-size: 11px; padding: 5px 9px; }
 
-  /* Modal: bottom sheet */
-  .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
-  }
+  .modal-overlay { padding: 0; align-items: flex-end; }
   .modal {
     border-radius: 18px 18px 0 0;
-    max-width: 100%;
-    max-height: 92vh;
+    max-width: 100%; max-height: 92vh;
     padding: 24px 20px 36px;
   }
-  .modal-header { flex-direction: column; gap: 6px; }
+  .modal-header { flex-direction: column; gap: 8px; }
   .modal-score { font-size: 36px; }
-  .asse-row { grid-template-columns: 78px 1fr 36px; gap: 8px; }
+  .asse-row { grid-template-columns: 80px 1fr 36px; gap: 8px; }
   .asse-name { font-size: 11px; }
   .modal-close { top: 14px; right: 16px; }
 }
@@ -699,7 +614,6 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 </head>
 <body>
 
-<!-- SIDEBAR OVERLAY mobile -->
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <!-- HEADER -->
@@ -722,7 +636,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
     </div>
     <div class="stat">
       <div class="stat-val" id="stat-fad">—</div>
-      <div class="stat-label">con FAD/asincrono</div>
+      <div class="stat-label">con FAD</div>
     </div>
   </div>
 
@@ -760,39 +674,19 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
       <h3>Tipologia</h3>
       <div class="filter-group">
         <button class="filter-btn active" data-filter="all">
-          <span>Tutti</span>
-          <span style="display:flex;align-items:center;gap:6px">
-            <span class="fb-count" id="cnt-all">—</span>
-            <span class="fb-dot"></span>
-          </span>
+          <span>Tutti</span><span class="fb-count" id="cnt-all">—</span>
         </button>
         <button class="filter-btn" data-filter="fad">
-          <span>✦ Con FAD</span>
-          <span style="display:flex;align-items:center;gap:6px">
-            <span class="fb-count" id="cnt-fad">—</span>
-            <span class="fb-dot"></span>
-          </span>
+          <span>✦ Con FAD</span><span class="fb-count" id="cnt-fad">—</span>
         </button>
         <button class="filter-btn" data-filter="pnrr">
-          <span>PNRR</span>
-          <span style="display:flex;align-items:center;gap:6px">
-            <span class="fb-count" id="cnt-pnrr">—</span>
-            <span class="fb-dot"></span>
-          </span>
+          <span>PNRR</span><span class="fb-count" id="cnt-pnrr">—</span>
         </button>
         <button class="filter-btn" data-filter="fse">
-          <span>FSE / fondi bilat.</span>
-          <span style="display:flex;align-items:center;gap:6px">
-            <span class="fb-count" id="cnt-fse">—</span>
-            <span class="fb-dot"></span>
-          </span>
+          <span>FSE / Fondi bilat.</span><span class="fb-count" id="cnt-fse">—</span>
         </button>
         <button class="filter-btn" data-filter="eu">
-          <span>Europeo</span>
-          <span style="display:flex;align-items:center;gap:6px">
-            <span class="fb-count" id="cnt-eu">—</span>
-            <span class="fb-dot"></span>
-          </span>
+          <span>Europeo</span><span class="fb-count" id="cnt-eu">—</span>
         </button>
       </div>
     </div>
@@ -801,24 +695,20 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
       <h3>Logica score</h3>
       <div class="asse-list">
         <div class="asse-item">
-          <div class="asse-dot" style="background:#a8e050"></div>
-          <span>Asincrono</span>
-          <span class="asse-peso">50%</span>
+          <div class="asse-dot" style="background:var(--green)"></div>
+          <span>Asincrono</span><span class="asse-peso">50%</span>
         </div>
         <div class="asse-item">
           <div class="asse-dot" style="background:var(--cool)"></div>
-          <span>Producibile</span>
-          <span class="asse-peso">25%</span>
+          <span>Producibile</span><span class="asse-peso">25%</span>
         </div>
         <div class="asse-item">
-          <div class="asse-dot" style="background:var(--warm)"></div>
-          <span>Mercato</span>
-          <span class="asse-peso">15%</span>
+          <div class="asse-dot" style="background:var(--amber)"></div>
+          <span>Mercato</span><span class="asse-peso">15%</span>
         </div>
         <div class="asse-item">
-          <div class="asse-dot" style="background:var(--hot)"></div>
-          <span>Timing</span>
-          <span class="asse-peso">10%</span>
+          <div class="asse-dot" style="background:var(--red)"></div>
+          <span>Timing</span><span class="asse-peso">10%</span>
         </div>
       </div>
     </div>
@@ -827,42 +717,47 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
   <!-- CONTENT -->
   <div class="content">
     <div class="toolbar">
-      <div class="toolbar-left">
-        <span class="result-count" id="result-count">—</span>
-      </div>
+      <span class="result-count" id="result-count">—</span>
       <div class="sort-btns">
         <button class="sort-btn active" data-sort="score">Score ↓</button>
         <button class="sort-btn" data-sort="title">Nome</button>
         <button class="sort-btn" data-sort="date">Recenti</button>
       </div>
     </div>
-
     <div id="cards-grid"></div>
   </div>
 </main>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay">
-  <div class="modal" style="position:relative">
+  <div class="modal">
     <button class="modal-close" id="modal-close">✕</button>
+
     <div class="modal-header">
-      <div>
-        <div class="modal-title" id="modal-title"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" id="modal-tags"></div>
-      </div>
-      <div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-score-wrap">
         <div class="modal-score" id="modal-score"></div>
-        <div class="score-label" style="text-align:right;margin-top:2px">/ 100</div>
+        <div class="modal-score-sub">/ 100</div>
       </div>
     </div>
+
+    <div id="modal-corso-wrap" class="modal-corso" style="display:none">
+      <div class="modal-corso-icon">🎓</div>
+      <div>
+        <div class="modal-corso-label">Corso da produrre</div>
+        <div class="modal-corso-text" id="modal-corso-text"></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;display:flex;gap:6px;flex-wrap:wrap" id="modal-tags"></div>
 
     <div class="modal-section">
       <h4>Breakdown score</h4>
       <div class="asse-breakdown">
         <div class="asse-row">
           <span class="asse-name">Asincrono <small style="color:var(--dim)">(×0.50)</small></span>
-          <div class="asse-bar-track"><div class="asse-bar-fill" id="bar-asincrono" style="background:#a8e050"></div></div>
-          <span class="asse-val" id="val-asincrono" style="color:#a8e050"></span>
+          <div class="asse-bar-track"><div class="asse-bar-fill" id="bar-asincrono" style="background:var(--green)"></div></div>
+          <span class="asse-val" id="val-asincrono" style="color:var(--green)"></span>
         </div>
         <div class="asse-row">
           <span class="asse-name">Producibile <small style="color:var(--dim)">(×0.25)</small></span>
@@ -871,13 +766,13 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
         </div>
         <div class="asse-row">
           <span class="asse-name">Mercato <small style="color:var(--dim)">(×0.15)</small></span>
-          <div class="asse-bar-track"><div class="asse-bar-fill" id="bar-mercato" style="background:var(--warm)"></div></div>
-          <span class="asse-val" id="val-mercato" style="color:var(--warm)"></span>
+          <div class="asse-bar-track"><div class="asse-bar-fill" id="bar-mercato" style="background:var(--amber)"></div></div>
+          <span class="asse-val" id="val-mercato" style="color:var(--amber)"></span>
         </div>
         <div class="asse-row">
           <span class="asse-name">Timing <small style="color:var(--dim)">(×0.10)</small></span>
-          <div class="asse-bar-track"><div class="asse-bar-fill" id="bar-timing" style="background:var(--hot)"></div></div>
-          <span class="asse-val" id="val-timing" style="color:var(--hot)"></span>
+          <div class="asse-bar-track"><div class="asse-bar-fill" id="bar-timing" style="background:var(--red)"></div></div>
+          <span class="asse-val" id="val-timing" style="color:var(--red)"></span>
         </div>
       </div>
     </div>
@@ -887,14 +782,14 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
       <div class="modal-desc" id="modal-desc"></div>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div>
-        <div style="font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em">Fonte</div>
-        <div style="font-family:var(--font-mono);font-size:12px;color:var(--muted)" id="modal-source"></div>
+    <div class="modal-footer">
+      <div class="modal-source-wrap">
+        <div class="modal-source-label">Fonte</div>
+        <div class="modal-source-val" id="modal-source"></div>
       </div>
       <a href="#" id="modal-link" class="modal-link" target="_blank" rel="noopener">
         <span>Apri bando</span>
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path d="M7 17L17 7M7 7h10v10"/>
         </svg>
       </a>
@@ -903,36 +798,22 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 </div>
 
 <script>
-// ── DATA ──
-// Carica da bandi.json nella stessa directory; fallback su dati campione
 let BANDI = [];
 let currentFilter = 'all';
 let currentSort = 'score';
 let currentSearch = '';
 let currentScoreMin = 0;
 
-// Helper: colore score
 function scoreColor(s) {
-  if (s >= 95) return 'var(--accent)';
-  if (s >= 85) return '#a8e050';
-  if (s >= 75) return 'var(--warm)';
-  if (s >= 60) return '#f0a840';
+  if (s >= 90) return 'var(--accent)';
+  if (s >= 75) return 'var(--green)';
+  if (s >= 60) return 'var(--amber)';
   return 'var(--muted)';
 }
-function scoreClass(s) {
-  if (s >= 95) return 's100';
-  if (s >= 85) return 's90';
-  if (s >= 75) return 's80';
-  if (s >= 60) return 's70';
-  return 's-low';
-}
 
-// Helper: tag tipologia
 function getTags(b) {
   const tags = [];
-  const t = (b.titolo || b.title || '').toLowerCase();
-  const d = (b.descrizione || b.description || '').toLowerCase();
-  const combined = t + ' ' + d;
+  const combined = ((b.titolo||b.title||'') + ' ' + (b.descrizione||b.description||'')).toLowerCase();
   if (combined.includes('pnrr')) tags.push('pnrr');
   if (combined.includes('fse') || combined.includes('fondimpresa') || combined.includes('fondo') || combined.includes('bilat')) tags.push('fse');
   if (combined.includes('europa') || combined.includes('msca') || combined.includes('horizon') || combined.includes('eit') || combined.includes('tunisi') || combined.includes('eu') || combined.includes('europeo')) tags.push('eu');
@@ -944,27 +825,18 @@ function matchesFilter(b) {
   if (currentFilter === 'all') return true;
   return getTags(b).includes(currentFilter);
 }
-
 function matchesSearch(b) {
   if (!currentSearch) return true;
   const q = currentSearch.toLowerCase();
-  const text = [(b.titolo||b.title||''), (b.descrizione||b.description||''), (b.fonte||b.source||'')].join(' ').toLowerCase();
-  return text.includes(q);
+  return [(b.titolo||b.title||''),(b.descrizione||b.description||''),(b.fonte||b.source||''),(b.argomento_corso||'')].join(' ').toLowerCase().includes(q);
 }
-
-function matchesScore(b) {
-  return (b.score_totale ?? b.score ?? 0) >= currentScoreMin;
-}
-
-function getFiltered() {
-  return BANDI.filter(b => matchesFilter(b) && matchesSearch(b) && matchesScore(b));
-}
-
+function matchesScore(b) { return (b.score_totale??b.score??0) >= currentScoreMin; }
+function getFiltered() { return BANDI.filter(b => matchesFilter(b) && matchesSearch(b) && matchesScore(b)); }
 function getSorted(arr) {
   return [...arr].sort((a,b) => {
     if (currentSort === 'score') return (b.score_totale??b.score??0) - (a.score_totale??a.score??0);
     if (currentSort === 'title') return (a.titolo||a.title||'').localeCompare(b.titolo||b.title||'');
-    if (currentSort === 'date') return new Date(b.data_pubblicazione||b.published||0) - new Date(a.data_pubblicazione||a.published||0);
+    if (currentSort === 'date')  return new Date(b.data_pubblicazione||b.published||0) - new Date(a.data_pubblicazione||a.published||0);
     return 0;
   });
 }
@@ -976,8 +848,6 @@ function updateStats() {
   const avg = all.length ? Math.round(all.reduce((s,b) => s+(b.score_totale??b.score??0),0)/all.length) : 0;
   document.getElementById('stat-avg').textContent = avg;
   document.getElementById('stat-fad').textContent = all.filter(b => (b.score_asincrono||0) >= 80).length;
-
-  // sidebar counts
   document.getElementById('cnt-all').textContent = all.length;
   ['fad','pnrr','fse','eu'].forEach(f => {
     document.getElementById('cnt-'+f).textContent = all.filter(b => getTags(b).includes(f)).length;
@@ -994,43 +864,55 @@ function renderCards() {
     return;
   }
 
-  grid.innerHTML = data.map((b,i) => {
-    const score = b.score_totale ?? b.score ?? 0;
-    const tags = getTags(b);
-    const title = b.titolo || b.title || 'Bando senza titolo';
+  grid.innerHTML = data.map((b, i) => {
+    const score    = b.score_totale ?? b.score ?? 0;
+    const tags     = getTags(b);
+    const title    = b.titolo || b.title || 'Bando senza titolo';
+    const corso    = b.argomento_corso || '';
     const isPriority = score >= 85;
-    const barColor = scoreColor(score);
-    const delay = Math.min(i * 30, 300);
+    const color    = scoreColor(score);
+    const delay    = Math.min(i * 25, 280);
 
     const pillsHtml = [
-      b.score_asincrono != null ? `<span class="asse-pill pill-asincrono">AS ${b.score_asincrono}</span>` : '',
-      b.score_producibile != null ? `<span class="asse-pill pill-producibile">PR ${b.score_producibile}</span>` : '',
-      b.score_mercato != null ? `<span class="asse-pill pill-mercato">ME ${b.score_mercato}</span>` : '',
-      b.score_timing != null ? `<span class="asse-pill pill-timing">TI ${b.score_timing}</span>` : '',
+      b.score_asincrono  != null ? `<span class="asse-pill pill-asincrono">AS ${b.score_asincrono}</span>` : '',
+      b.score_producibile!= null ? `<span class="asse-pill pill-producibile">PR ${b.score_producibile}</span>` : '',
+      b.score_mercato    != null ? `<span class="asse-pill pill-mercato">ME ${b.score_mercato}</span>` : '',
+      b.score_timing     != null ? `<span class="asse-pill pill-timing">TI ${b.score_timing}</span>` : '',
     ].filter(Boolean).join('');
 
     const tagsHtml = tags.map(t => `<span class="tag ${t}">${t.toUpperCase()}</span>`).join('');
-    const dateStr = b.data_pubblicazione ? new Date(b.data_pubblicazione).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) :
-                    b.published ? new Date(b.published).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '';
+    const dateStr  = (b.data_pubblicazione || b.published)
+      ? new Date(b.data_pubblicazione||b.published).toLocaleDateString('it-IT',{day:'2-digit',month:'short'})
+      : '';
+
+    const corsoHtml = corso
+      ? `<div class="card-corso">
+           <div class="card-corso-icon">🎓</div>
+           <div>
+             <span class="card-corso-label">Corso da produrre</span>
+             <span class="card-corso-text">${corso}</span>
+           </div>
+         </div>`
+      : '';
 
     return `<div class="bando-card${isPriority?' priority':''}" data-idx="${BANDI.indexOf(b)}" style="animation-delay:${delay}ms">
       <div class="card-top">
-        <div class="card-title">${title}</div>
         <div class="score-badge">
-          <div class="score-num ${scoreClass(score)}" style="color:${barColor}">${score}</div>
+          <div class="score-num" style="color:${color}">${score}</div>
           <div class="score-label">score</div>
         </div>
+        <div class="card-title">${title}</div>
       </div>
-      <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${score}%;background:${barColor}"></div></div>
+      ${corsoHtml}
+      <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${score}%;background:${color}"></div></div>
       ${pillsHtml ? `<div class="asse-pills">${pillsHtml}</div>` : ''}
       <div class="card-meta">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${tagsHtml}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">${tagsHtml}</div>
         ${dateStr ? `<span class="card-date">${dateStr}</span>` : ''}
       </div>
     </div>`;
   }).join('');
 
-  // click handlers
   grid.querySelectorAll('.bando-card').forEach(card => {
     card.addEventListener('click', () => openModal(BANDI[+card.dataset.idx]));
   });
@@ -1039,44 +921,48 @@ function renderCards() {
 function openModal(b) {
   const score = b.score_totale ?? b.score ?? 0;
   const title = b.titolo || b.title || 'Bando';
+  const corso = b.argomento_corso || '';
+
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-score').textContent = score;
   document.getElementById('modal-score').style.color = scoreColor(score);
   document.getElementById('modal-desc').textContent = b.descrizione || b.description || b.summary || 'Nessuna descrizione disponibile.';
   document.getElementById('modal-source').textContent = b.fonte || b.source || '—';
 
+  // Argomento corso
+  const corsoWrap = document.getElementById('modal-corso-wrap');
+  const corsoText = document.getElementById('modal-corso-text');
+  if (corso) {
+    corsoText.textContent = corso;
+    corsoWrap.style.display = 'flex';
+  } else {
+    corsoWrap.style.display = 'none';
+  }
+
+  // Link
   const link = document.getElementById('modal-link');
   const href = b.url || b.link || b.href || b.link_bando || b.url_bando || b.permalink || '';
-  if (href) {
-    link.href = href;
-    link.style.opacity = '1';
-    link.style.pointerEvents = 'auto';
-    link.querySelector('span').textContent = 'Apri bando';
-  } else {
-    link.href = '#';
-    link.style.opacity = '0.35';
-    link.style.pointerEvents = 'none';
-    link.querySelector('span').textContent = 'Link non disponibile';
-  }
+  link.href = href || '#';
+  link.style.opacity = href ? '1' : '0.35';
+  link.style.pointerEvents = href ? 'auto' : 'none';
+  link.querySelector('span').textContent = href ? 'Apri bando' : 'Link non disponibile';
   link.style.display = 'inline-flex';
 
-  // tags
-  const tags = getTags(b);
-  document.getElementById('modal-tags').innerHTML = tags.map(t => `<span class="tag ${t}">${t.toUpperCase()}</span>`).join('');
+  // Tags
+  document.getElementById('modal-tags').innerHTML = getTags(b).map(t => `<span class="tag ${t}">${t.toUpperCase()}</span>`).join('');
 
-  // bars — animate after tick
-  const assi = [
-    {id:'asincrono', val: b.score_asincrono},
+  // Barre assi
+  [
+    {id:'asincrono',   val: b.score_asincrono},
     {id:'producibile', val: b.score_producibile},
-    {id:'mercato', val: b.score_mercato},
-    {id:'timing', val: b.score_timing},
-  ];
-  assi.forEach(a => {
+    {id:'mercato',     val: b.score_mercato},
+    {id:'timing',      val: b.score_timing},
+  ].forEach(a => {
     const v = a.val ?? 0;
     document.getElementById('val-'+a.id).textContent = v;
     const bar = document.getElementById('bar-'+a.id);
     bar.style.width = '0%';
-    setTimeout(() => { bar.style.width = v + '%'; }, 50);
+    setTimeout(() => { bar.style.width = v + '%'; }, 60);
   });
 
   document.getElementById('modal-overlay').classList.add('open');
@@ -1088,77 +974,54 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-// ── EVENT LISTENERS ──
+// Event listeners
 document.getElementById('modal-close').addEventListener('click', closeModal);
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-document.getElementById('search').addEventListener('input', e => {
-  currentSearch = e.target.value.trim();
-  renderCards();
-});
-
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target===e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+document.getElementById('search').addEventListener('input', e => { currentSearch = e.target.value.trim(); renderCards(); });
 document.getElementById('score-range').addEventListener('input', e => {
   currentScoreMin = +e.target.value;
   document.getElementById('range-val').textContent = e.target.value;
   renderCards();
 });
+document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.filter;
+  renderCards();
+}));
+document.querySelectorAll('.sort-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSort = btn.dataset.sort;
+  renderCards();
+}));
 
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    renderCards();
-  });
-});
-
-document.querySelectorAll('.sort-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentSort = btn.dataset.sort;
-    renderCards();
-  });
-});
-
-// ── LOAD DATA ──
+// Load data
 async function loadData() {
   try {
     const res = await fetch('bandi.json');
     if (!res.ok) throw new Error('fetch failed');
     const raw = await res.json();
-    // Supporta sia array che { bandi: [...] }
     BANDI = Array.isArray(raw) ? raw : (raw.bandi || raw.data || []);
   } catch(e) {
-    // Dati campione per preview
     BANDI = [
-      { titolo: 'PNRR Digitalizzazione PA', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 100, score_timing: 100, descrizione: 'Bando PNRR per la digitalizzazione della pubblica amministrazione. Finanzia formazione asincrona su competenze digitali, cybersecurity e trasformazione digitale per dipendenti pubblici.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-20' },
-      { titolo: 'AID4SME — AI per PMI', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 100, score_timing: 100, descrizione: 'Programma europeo per l\'adozione di soluzioni AI nelle PMI. Prevede formazione erogabile in modalità asincrona su intelligenza artificiale applicata, automazione e data literacy.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-18' },
-      { titolo: 'Fondimpresa AI', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 80, descrizione: 'Avviso Fondimpresa dedicato all\'aggiornamento delle competenze in ambito intelligenza artificiale e automazione per lavoratori delle aziende aderenti.', fonte: 'formazionefinanziata.com', data_pubblicazione: '2026-05-15' },
-      { titolo: 'Catalogo Fondimpresa', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 80, descrizione: 'Avviso catalogo per formazione continua finanziata tramite Fondimpresa. Corsi erogabili in FAD su sicurezza, digitale e soft skills.', fonte: 'formazionefinanziata.com', data_pubblicazione: '2026-05-10' },
-      { titolo: 'FSE+ Competenze digitali', score_totale: 95, score_asincrono: 100, score_producibile: 90, score_mercato: 100, score_timing: 80, descrizione: 'Bando FSE+ per il potenziamento delle competenze digitali dei lavoratori. Formazione ammissibile in modalità e-learning e blended.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-08' },
-      { titolo: 'Fondo Competenze 4', score_totale: 95, score_asincrono: 100, score_producibile: 90, score_mercato: 100, score_timing: 80, descrizione: 'Quarta edizione del Fondo per le competenze. Finanzia piani formativi aziendali con forte componente digitale e asincrona.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-05' },
-      { titolo: 'Fondoprofessioni 1/2026', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 80, score_timing: 90, descrizione: 'Primo avviso 2026 Fondoprofessioni per studi professionali. Formazione su fiscalità, normativa, digitale — erogabile in FAD.', fonte: 'formazionefinanziata.com', data_pubblicazione: '2026-04-28' },
-      { titolo: 'Mobilità urbana EIT', score_totale: 95, score_asincrono: 90, score_producibile: 100, score_mercato: 100, score_timing: 90, descrizione: 'Programma EIT Urban Mobility per formazione su mobilità sostenibile, micromobilità e pianificazione urbana. Erogabile online.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-22' },
-      { titolo: 'Investimenti sostenibili 4.0', score_totale: 95, score_asincrono: 90, score_producibile: 100, score_mercato: 100, score_timing: 90, descrizione: 'Bando per formazione su Industria 4.0, transizione verde e competenze STEM. Forte componente e-learning prevista.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-18' },
-      { titolo: 'Easy SMACT digitalizzazione', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 80, score_timing: 90, descrizione: 'Percorsi formativi su tecnologie SMACT (Social, Mobile, Analytics, Cloud, Things) per PMI del Nordest. Corsi in FAD e blended.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-15' },
-      { titolo: 'MSCA Postdoctoral Fellowships', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 100, descrizione: 'Borse Marie Sklodowska-Curie per ricercatori post-dottorato. Prevede componente di formazione e disseminazione in formato digitale.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-10' },
-      { titolo: 'MedITech PNRR', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 100, descrizione: 'Bando PNRR MedITech per formazione avanzata in ambito medtech, dispositivi medici e digital health. Forte componente asincrona.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-05' },
-      { titolo: 'Autoproduzione energia PMI', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 100, descrizione: 'Incentivi per PMI che adottano soluzioni di autoproduzione energetica. Prevede formazione obbligatoria su efficienza energetica erogabile online.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-01' },
-      { titolo: 'Bando Italia-Tunisia formazione', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 80, score_timing: 100, descrizione: 'Programma di cooperazione Italia-Tunisia per formazione professionale. Prevede sviluppo di contenuti FAD multilingua.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-03-28' },
+      { titolo: 'PNRR Digitalizzazione PA', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 100, score_timing: 100, argomento_corso: 'Competenze digitali per la PA', descrizione: 'Bando PNRR per la digitalizzazione della pubblica amministrazione. Finanzia formazione asincrona su competenze digitali, cybersecurity e trasformazione digitale per dipendenti pubblici.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-20' },
+      { titolo: 'AID4SME — AI per PMI', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 100, score_timing: 100, argomento_corso: 'Intelligenza artificiale applicata alle PMI', descrizione: 'Programma europeo per l\'adozione di soluzioni AI nelle PMI. Prevede formazione erogabile in modalità asincrona su intelligenza artificiale applicata, automazione e data literacy.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-18' },
+      { titolo: 'Fondimpresa AI', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 80, argomento_corso: 'AI e automazione per lavoratori', descrizione: 'Avviso Fondimpresa dedicato all\'aggiornamento delle competenze in ambito intelligenza artificiale e automazione per lavoratori delle aziende aderenti.', fonte: 'formazionefinanziata.com', data_pubblicazione: '2026-05-15' },
+      { titolo: 'Catalogo Fondimpresa', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 80, argomento_corso: 'Sicurezza, digitale e soft skills', descrizione: 'Avviso catalogo per formazione continua finanziata tramite Fondimpresa. Corsi erogabili in FAD su sicurezza, digitale e soft skills.', fonte: 'formazionefinanziata.com', data_pubblicazione: '2026-05-10' },
+      { titolo: 'FSE+ Competenze digitali', score_totale: 95, score_asincrono: 100, score_producibile: 90, score_mercato: 100, score_timing: 80, argomento_corso: 'Competenze digitali per lavoratori', descrizione: 'Bando FSE+ per il potenziamento delle competenze digitali dei lavoratori. Formazione ammissibile in modalità e-learning e blended.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-08' },
+      { titolo: 'Fondo Competenze 4', score_totale: 95, score_asincrono: 100, score_producibile: 90, score_mercato: 100, score_timing: 80, argomento_corso: 'Formazione digitale aziendale', descrizione: 'Quarta edizione del Fondo per le competenze. Finanzia piani formativi aziendali con forte componente digitale e asincrona.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-05-05' },
+      { titolo: 'Fondoprofessioni 1/2026', score_totale: 95, score_asincrono: 100, score_producibile: 100, score_mercato: 80, score_timing: 90, argomento_corso: 'Fiscalità e normativa per studi professionali', descrizione: 'Primo avviso 2026 Fondoprofessioni per studi professionali. Formazione su fiscalità, normativa, digitale — erogabile in FAD.', fonte: 'formazionefinanziata.com', data_pubblicazione: '2026-04-28' },
+      { titolo: 'MedITech PNRR', score_totale: 100, score_asincrono: 100, score_producibile: 100, score_mercato: 90, score_timing: 100, argomento_corso: 'Digital health e dispositivi medici', descrizione: 'Bando PNRR MedITech per formazione avanzata in ambito medtech, dispositivi medici e digital health. Forte componente asincrona.', fonte: 'europainnovazione.com', data_pubblicazione: '2026-04-05' },
     ];
-    // Mostra avviso dati campione
     const warn = document.createElement('div');
-    warn.style.cssText = 'position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid rgba(200,240,64,0.2);color:var(--muted);font-size:12px;font-family:var(--font-mono);padding:10px 16px;border-radius:8px;z-index:300';
+    warn.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid #e0e2e7;color:#5c6070;font-size:12px;font-family:monospace;padding:10px 16px;border-radius:8px;z-index:300;box-shadow:0 4px 12px rgba(0,0,0,0.1)';
     warn.textContent = '⚠ bandi.json non trovato — dati di esempio';
     document.body.appendChild(warn);
     setTimeout(() => warn.remove(), 5000);
   }
 
-  // Update last updated
   const dates = BANDI.map(b => b.data_pubblicazione || b.published).filter(Boolean).sort().reverse();
   if (dates.length) {
     const d = new Date(dates[0]);
@@ -1171,7 +1034,7 @@ async function loadData() {
 
 loadData();
 
-// ── SIDEBAR DRAWER (mobile) ──
+// Sidebar drawer mobile
 const burgerBtn = document.getElementById("burger-btn");
 const sidebarEl = document.querySelector("aside");
 const overlayEl = document.getElementById("sidebar-overlay");
@@ -1179,7 +1042,6 @@ function openSidebar()  { sidebarEl.classList.add("open"); overlayEl.classList.a
 function closeSidebar() { sidebarEl.classList.remove("open"); overlayEl.classList.remove("open"); document.body.style.overflow = ""; }
 if (burgerBtn) burgerBtn.addEventListener("click", openSidebar);
 if (overlayEl) overlayEl.addEventListener("click", closeSidebar);
-// chiudi drawer quando si sceglie un filtro su mobile
 document.querySelectorAll(".filter-btn").forEach(btn => btn.addEventListener("click", () => { if (window.innerWidth <= 700) closeSidebar(); }));
 </script>
 </body>
