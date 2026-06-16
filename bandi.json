@@ -539,6 +539,32 @@
     "argomento_corso": "Innovazioni sociali transizione verde digitale"
   },
   {
+    "id": "3292c1427dfc",
+    "titolo": "Cybersicurezza: il MUR finanzia formazione, mobilità internazionale e infrastrutture digitali",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/cybersicurezza-il-mur-finanzia-formazione-mobilita-internazionale-e-infrastrutture-digitali/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Finanziamenti fino al 100% per formazione specialistica e infrastrutture digitali NIS 2. Domande su CINECA dal 30 giugno 2026.",
+    "tags": [
+      "Digitale/AI"
+    ],
+    "argomento_corso": "Cybersicurezza formazione",
+    "score_asincrono": 0,
+    "score_producibile": 0,
+    "score_mercato": 100,
+    "score_timing": 100,
+    "score_totale": 25,
+    "score_fad": 0,
+    "score_accessibilita": 100,
+    "score_trend": 0,
+    "score_budget": 100,
+    "data_inserimento": "2026-06-16",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "761c42c8e015",
     "titolo": "PR FESR 2021/2027 – Azione 1.1.1 A – Promozione ricerca collaborativa e trasferimento tecnologico – Avviso pubblico “Ripresa Sicilia Plus”",
     "ente": "Europa Innovazione — Formazione",
