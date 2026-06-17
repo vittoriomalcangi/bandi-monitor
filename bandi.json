@@ -590,6 +590,33 @@
     "argomento_corso": "Ricerca collaborativa e trasferimento tecnologico"
   },
   {
+    "id": "17f49f02b8ad",
+    "titolo": "Bando Tertium",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/bando-tertium/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Agevolazioni per investimenti digitali, green e nuovi marchi nel settore tessile e accessorio. Domande in Lombardia entro il 7 settembre 2026.",
+    "tags": [
+      "Digitale/AI",
+      "Green"
+    ],
+    "argomento_corso": "investimenti digitali e green",
+    "score_asincrono": 0,
+    "score_producibile": 0,
+    "score_mercato": 100,
+    "score_timing": 60,
+    "score_totale": 21,
+    "score_fad": 0,
+    "score_accessibilita": 100,
+    "score_trend": 0,
+    "score_budget": 60,
+    "data_inserimento": "2026-06-17",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "3e3a09172ebf",
     "titolo": "MSCA MaRaThoN 2026: a Padova il training intensivo per candidarsi alle Postdoctoral Fellowships",
     "ente": "Europa Innovazione — Formazione",
