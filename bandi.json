@@ -246,6 +246,33 @@
     "argomento_corso": "sostenibilità e innovazione"
   },
   {
+    "id": "4d9ab2149a6d",
+    "titolo": "Bando Voucher di Accelerazione",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/bando-voucher-di-accelerazione/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Contributi per percorsi di crescita strategica delle PMI lombarde del Made in Italy. Sportello aperto dal 15 giugno 2026.",
+    "tags": [
+      "PMI",
+      "Voucher/Catalogo"
+    ],
+    "argomento_corso": "crescita strategica PMI",
+    "score_asincrono": 0,
+    "score_producibile": 70,
+    "score_mercato": 100,
+    "score_timing": 60,
+    "score_totale": 38,
+    "score_fad": 0,
+    "score_accessibilita": 100,
+    "score_trend": 70,
+    "score_budget": 60,
+    "data_inserimento": "2026-06-19",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "1dd09ddf3465",
     "titolo": "Progetto AID4SME: seconda call per soluzioni basate sull’Intelligenza Artificiale e sui dati",
     "ente": "Europa Innovazione — Bandi Europei",
