@@ -111,6 +111,32 @@
     "argomento_corso": "inserimento donne fondi d investimento"
   },
   {
+    "id": "a1315e30a90e",
+    "titolo": "Bando per l’assegnazione di contributi per la realizzazione dei servizi di facilitazione e formazione digitale",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/bando-per-lassegnazione-di-contributi-per-la-realizzazione-dei-servizi-di-facilitazione-e-formazione-digitale/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Finanziamenti regionali per l'apertura di Punti di Facilitazione Digitale. Domande online dal 20 luglio al 31 agosto 2026.",
+    "tags": [
+      "Digitale/AI"
+    ],
+    "argomento_corso": "servizi di facilitazione e formazione digitale",
+    "score_asincrono": 0,
+    "score_producibile": 100,
+    "score_mercato": 100,
+    "score_timing": 100,
+    "score_totale": 50,
+    "score_fad": 0,
+    "score_accessibilita": 100,
+    "score_trend": 100,
+    "score_budget": 100,
+    "data_inserimento": "2026-07-18",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
     "id": "e12cb82bef20",
     "titolo": "Camera Commercio Romagna: al via il bando Doppia Transizione 2026",
     "ente": "Europa Innovazione — Bandi Nazionali",
@@ -1010,6 +1036,35 @@
     "score_trend": 0,
     "score_budget": 60,
     "data_inserimento": "2026-07-12",
+    "stato": "Attivo",
+    "region": "Nazionale"
+  },
+  {
+    "id": "2a2d43de8633",
+    "titolo": "Voucher Doppia Transizione 2026: dalla Camera di commercio di Bologna 600 mila euro per digitalizzazione e sostenibilità delle PMI",
+    "ente": "Europa Innovazione — Bandi Nazionali",
+    "fonte": "Europa Innovazione — Bandi Nazionali",
+    "url": "https://www.europainnovazione.com/voucher-doppia-transizione-2026-dalla-camera-di-commercio-di-bologna-600-mila-euro-per-digitalizzazione-e-sostenibilita-delle-pmi/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Contributi della Camera di Commercio per digitale e sostenibilità. Domande fino al 17 settembre 2026. Corsie preferenziali per aziende rosa e giovani.",
+    "tags": [
+      "Digitale/AI",
+      "Green",
+      "PMI",
+      "Voucher/Catalogo"
+    ],
+    "argomento_corso": "digitalizzazione e sostenibilità",
+    "score_asincrono": 0,
+    "score_producibile": 0,
+    "score_mercato": 100,
+    "score_timing": 60,
+    "score_totale": 21,
+    "score_fad": 0,
+    "score_accessibilita": 100,
+    "score_trend": 0,
+    "score_budget": 60,
+    "data_inserimento": "2026-07-18",
     "stato": "Attivo",
     "region": "Nazionale"
   },
