@@ -59,6 +59,32 @@
     "argomento_corso": "Competenze digitali per lavoratori"
   },
   {
+    "id": "ff6c6cd26c18",
+    "titolo": "Corsi di Sviluppo Professionale Continuo (CPD) basati sulle competenze",
+    "ente": "Europa Innovazione — Bandi Europei",
+    "fonte": "Europa Innovazione — Bandi Europei",
+    "url": "https://www.europainnovazione.com/corsi-di-sviluppo-professionale-continuo-cpd-basati-sulle-competenze/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Fondi UE fino a 75.000€ per percorsi di formazione online su IA, IP e storytelling nei media. Scadenza: 14 settembre 2026.",
+    "tags": [
+      "FAD"
+    ],
+    "argomento_corso": "IA, IP, storytelling nei media",
+    "score_asincrono": 70,
+    "score_producibile": 100,
+    "score_mercato": 100,
+    "score_timing": 100,
+    "score_totale": 85,
+    "score_fad": 70,
+    "score_accessibilita": 100,
+    "score_trend": 100,
+    "score_budget": 100,
+    "data_inserimento": "2026-07-23",
+    "stato": "Attivo",
+    "region": "Europeo"
+  },
+  {
     "id": "2c493305708f",
     "titolo": "Mobilità urbana sostenibile: bando EIT per corsi di formazione professionale",
     "ente": "Europa Innovazione — Formazione",
