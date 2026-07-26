@@ -1,5 +1,31 @@
 [
   {
+    "id": "a98c445fe333",
+    "titolo": "Audiovisivo e nuove tecnologie: al via bando EIT per la formazione avanzata nei settori culturali e creatividiovisivo – Anno 2026",
+    "ente": "Europa Innovazione — Bandi Europei",
+    "fonte": "Europa Innovazione — Bandi Europei",
+    "url": "https://www.europainnovazione.com/audiovisivo-e-nuove-tecnologie-al-via-bando-eit-per-la-formazione-avanzata-nei-settori-culturali-e-creativi/",
+    "scadenza": "",
+    "budget": "",
+    "descrizione": "Contributi a fondo perduto fino a 75.000€ per percorsi di formazione online asincroni. 600 corsisti target. Scadenza: 14 settembre 2026.",
+    "tags": [
+      "FAD"
+    ],
+    "argomento_corso": "formazione avanzata settori culturali",
+    "score_asincrono": 100,
+    "score_producibile": 100,
+    "score_mercato": 100,
+    "score_timing": 100,
+    "score_totale": 100,
+    "score_fad": 100,
+    "score_accessibilita": 100,
+    "score_trend": 100,
+    "score_budget": 100,
+    "data_inserimento": "2026-07-26",
+    "stato": "Attivo",
+    "region": "Europeo"
+  },
+  {
     "id": "esempio002",
     "titolo": "Catalogo Fondimpresa 2025 – Formazione continua PMI",
     "ente": "Fondimpresa",
