@@ -56,35 +56,6 @@
     "argomento_corso": "formazione continua PMI"
   },
   {
-    "id": "esempio001",
-    "titolo": "Avviso FSE+ 2024 – Competenze digitali per lavoratori occupati",
-    "ente": "Regione Lombardia",
-    "fonte": "RSS Lombardia",
-    "url": "https://www.bandi.regione.lombardia.it",
-    "scadenza": "2026-09-30",
-    "budget": "€ 8.500.000",
-    "descrizione": "Finanziamento per percorsi formativi sulle competenze digitali. Ammessi moduli e-learning fruibili autonomamente. Non richiesto accreditamento per privati in partenariato.",
-    "tags": [
-      "FAD",
-      "FSE+",
-      "Digitale/AI"
-    ],
-    "score_fad": 100,
-    "score_accessibilita": 100,
-    "score_trend": 100,
-    "score_budget": 60,
-    "score_totale": 96,
-    "data_inserimento": "2026-05-31",
-    "analisi_ai": null,
-    "stato": "Attivo",
-    "region": "Lombardia",
-    "score_asincrono": 100,
-    "score_producibile": 100,
-    "score_mercato": 100,
-    "score_timing": 60,
-    "argomento_corso": "Competenze digitali per lavoratori"
-  },
-  {
     "id": "ff6c6cd26c18",
     "titolo": "Corsi di Sviluppo Professionale Continuo (CPD) basati sulle competenze",
     "ente": "Europa Innovazione — Bandi Europei",
